@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+  <title>ZERIONX1 · probability intelligence</title>
+
+  <meta name="description" content="Zerionx1 is a probability-based algorithmic market intelligence platform for Crypto, Forex, Indian Markets, Commodities and Global Indices. No fund custody. Full capital control.">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="ZERIONX1">
+  <meta property="og:title" content="ZERIONX1 | One Intelligence. All Markets.">
+  <meta property="og:description" content="Probability-based algorithmic market intelligence for Crypto, Forex, Indian Markets, Commodities and Global Indices. No fund custody. Full capital control.">
+  <meta property="og:image" content="https://zerionx1.com/preview.png">
+  <link rel="canonical" href="https://zerionx1.com/">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --obsidian: #03050A;
+      --raisin: #0B0F16;
+      --ebony: #11161F;
+      --steel: #1E2632;
+      --gold-24k: #C8AA6E;
+      --gold-light: #E5D2AA;
+      --gold-rich: #B49450;
+      --platinum: #F2F4F8;
+      --mist: #C0C8D2;
+      --slate: #5D697A;
+      --shadow-heavy: 0 30px 60px -12px rgba(0,0,0,0.8);
+      --transition-ex: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      --glass: rgba(17, 22, 31, 0.7);
+      --glass-edge: 1px solid rgba(200, 170, 110, 0.2);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--obsidian);
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-24k) var(--obsidian);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--obsidian);
+      color: var(--platinum);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 max(24px, 4vw);
+    }
+
+    .section { padding: clamp(60px, 10vw, 130px) 0; position: relative; }
+
+    /* Performance-Optimized Background */
+    .full-bleed-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      background: radial-gradient(circle at 20% 30%, #0D1219 0%, #030405 100%);
+    }
+    .full-bleed-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=2832&auto=format&fit=crop') center/cover no-repeat;
+      opacity: 0.04;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+    }
+
+    /* Header - Fixed & Fluid */
+    .system-header {
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      z-index: 1000;
+      padding: 20px 0;
+      transition: var(--transition-ex);
+      border-bottom: 1px solid transparent;
+    }
+
+    .system-header.scrolled {
+      background: rgba(3, 5, 10, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(200, 170, 110, 0.15);
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-system {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(20px, 4vw, 26px);
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+    }
+    .logo-system i { color: var(--gold-24k); }
+    .logo-system span { color: var(--gold-24k); border-bottom: 2px solid var(--gold-24k); }
+
+    .system-nav { display: flex; align-items: center; gap: clamp(15px, 3vw, 32px); }
+    .nav-main { display: flex; gap: 24px; }
+    .nav-main a {
+      text-decoration: none;
+      color: var(--mist);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      transition: var(--transition-ex);
+      position: relative;
+    }
+    .nav-main a:hover { color: white; }
+    .nav-main a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0;
+      width: 0; height: 1.5px; background: var(--gold-24k);
+      transition: var(--transition-ex);
+    }
+    .nav-main a:hover::after { width: 100%; }
+
+    /* Mobile Menu UI */
+    .mobile-menu {
+      display: none;
+      font-size: 24px;
+      color: var(--gold-24k);
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .mobile-dropdown {
+      position: absolute;
+      top: 100%; right: 24px;
+      width: 280px;
+      background: #0B0F16;
+      border: 1px solid rgba(200, 170, 110, 0.3);
+      border-radius: 20px;
+      padding: 12px 0;
+      display: none;
+      box-shadow: var(--shadow-heavy);
+      animation: menuFade 0.3s ease forwards;
+    }
+    @keyframes menuFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .mobile-dropdown a {
+      display: block; padding: 14px 28px;
+      color: var(--platinum); text-decoration: none;
+      font-weight: 500; font-size: 0.95rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    /* Global Buttons */
+    .system-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 12px 28px; border-radius: 50px;
+      text-decoration: none; font-weight: 700;
+      font-size: 0.8rem; letter-spacing: 1px;
+      text-transform: uppercase; transition: var(--transition-ex);
+      border: 1.5px solid var(--gold-24k); color: var(--gold-24k);
+      white-space: nowrap;
+    }
+    .system-btn:hover {
+      background: rgba(200, 170, 110, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -10px var(--gold-24k);
+    }
+    .system-btn-primary {
+      background: var(--gold-24k); color: var(--obsidian); border: none;
+    }
+    .system-btn-primary:hover {
+      background: var(--gold-light); color: #000;
+    }
+
+    /* Hero Section */
+    .hero-system {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding-top: 100px; position: relative;
+    }
+    .hero-video-system {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: -2; opacity: 0.35;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0; z-index: -1;
+      background: linear-gradient(to right, var(--obsidian) 40%, transparent 100%),
+                  linear-gradient(to top, var(--obsidian) 10%, transparent 40%);
+    }
+
+    .hero-system h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.8rem, 8vw, 5.2rem);
+      line-height: 1.05; margin-bottom: 24px;
+      background: linear-gradient(135deg, #FFF 40%, var(--gold-light) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero-description-system {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--mist); max-width: 850px;
+      margin-bottom: 48px; font-weight: 300; line-height: 1.7;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px; margin-top: 80px;
+    }
+    .stat-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      padding: 35px 25px; border-radius: 24px;
+      border: var(--glass-edge); transition: var(--transition-ex);
+    }
+    .stat-card:hover { border-color: var(--gold-24k); transform: translateY(-8px); }
+    .stat-number {
+      font-family: 'Space Grotesk';
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--gold-24k); display: block; margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 0.75rem; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--slate); font-weight: 600;
+    }
+
+    /* Standard Cards */
+    .section-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem); margin-bottom: 20px;
+    }
+    .section-header p {
+      font-size: clamp(1rem, 2vw, 1.2rem); color: var(--mist);
+      max-width: 700px; margin-bottom: 60px; font-weight: 300;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+      gap: 32px;
+    }
+
+    .card {
+      position: relative; height: 600px;
+      border-radius: 36px; overflow: hidden;
+      display: flex; flex-direction: column;
+      justify-content: flex-end; padding: 45px;
+      transition: var(--transition-ex);
+      border: 1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .card-bg {
+      position: absolute; inset: 0; z-index: -1;
+      background-size: cover; background-position: center;
+      transition: transform 1.2s ease;
+    }
+    .card:hover .card-bg { transform: scale(1.1); }
+    .card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(3,5,10,0.95) 20%, rgba(3,5,10,0.4) 60%, transparent 100%);
+    }
+
+    .card-icon {
+      width: 72px; height: 72px; background: rgba(200,170,110,0.1);
+      border-radius: 20px; display: flex; align-items: center;
+      justify-content: center; color: var(--gold-24k);
+      font-size: 28px; margin-bottom: 28px;
+      border: 1px solid rgba(200,170,110,0.25);
+      position: relative;
+    }
+    .card-title { font-size: clamp(1.8rem, 3vw, 2.4rem); color: white; margin-bottom: 8px; position: relative; font-family: 'Space Grotesk'; }
+    .card-subtitle { font-size: 0.85rem; color: var(--gold-24k); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 28px; position: relative; font-weight: 600; }
+    
+    .points-list { list-style: none; position: relative; }
+    .points-list li { display: flex; gap: 14px; margin-bottom: 16px; font-size: 1rem; color: rgba(255,255,255,0.85); font-weight: 300; line-height: 1.4; }
+    .points-list li i { color: var(--gold-24k); margin-top: 3px; font-size: 15px; }
+
+    /* Card Background Images */
+    .overview-section .card:nth-child(1) .card-bg { background-image: url('https://images.unsplash.com/photo-1639322537234-2f3ab0f31b89?q=80&w=1000&auto=format&fit=crop'); }
+    .overview-section .card:nth-child(2) .card-bg { background-image: url('https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?q=80&w=1000&auto=format&fit=crop'); }
+    .overview-section .card:nth-child(3) .card-bg { background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop'); }
+    .overview-section .card:nth-child(4) .card-bg { background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1000&auto=format&fit=crop'); }
+    .how-it-works-section .card:nth-child(1) .card-bg { background-image: url('https://images.unsplash.com/photo-1542909168-5d3c5b4b4f9b?q=80&w=1000&auto=format&fit=crop'); }
+    .how-it-works-section .card:nth-child(2) .card-bg { background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop'); }
+    .how-it-works-section .card:nth-child(3) .card-bg { background-image: url('https://images.unsplash.com/photo-1639322537451-a5c6d3c6c3c6?q=80&w=1000&auto=format&fit=crop'); }
+    .markets-section .card:nth-child(1) .card-bg { background-image: url('https://images.unsplash.com/photo-1621761191319-c6fb62004040?q=80&w=1000&auto=format&fit=crop'); }
+    .markets-section .card:nth-child(2) .card-bg { background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1000&auto=format&fit=crop'); }
+    .markets-section .card:nth-child(3) .card-bg { background-image: url('https://images.unsplash.com/photo-1621761191319-c6fb62004040?q=80&w=1000&auto=format&fit=crop'); }
+    .markets-section .card:nth-child(4) .card-bg { background-image: url('https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=1000&auto=format&fit=crop'); }
+    .trust-section .card:nth-child(1) .card-bg { background-image: url('https://images.unsplash.com/photo-1553877522-43269d4ea984?q=80&w=1000&auto=format&fit=crop'); }
+    .trust-section .card:nth-child(2) .card-bg { background-image: url('https://images.unsplash.com/photo-1611224923853-80b023f02d71?q=80&w=1000&auto=format&fit=crop'); }
+    .trust-section .card:nth-child(3) .card-bg { background-image: url('https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1000&auto=format&fit=crop'); }
+    .trust-section .card:nth-child(4) .card-bg { background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1000&auto=format&fit=crop'); }
+
+    /* CTA Section */
+    .cta-system {
+      background: #05080C;
+      text-align: center;
+      border-block: 1px solid rgba(200, 170, 110, 0.15);
+    }
+    .cta-title { font-size: clamp(2.5rem, 6vw, 4.2rem); margin-bottom: 24px; color: white; font-family: 'Space Grotesk'; }
+    .cta-subtitle { font-size: clamp(1.1rem, 2vw, 1.4rem); color: var(--mist); margin-bottom: 48px; max-width: 800px; margin-inline: auto; font-weight: 300; }
+    .cta-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+
+    /* Footer */
+    .footer-system { background: #020406; padding: 100px 0 50px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .footer-content {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 60px; margin-bottom: 80px;
+    }
+    .footer-col h4 { color: white; margin-bottom: 28px; font-size: 1.1rem; letter-spacing: 2px; font-family: 'Space Grotesk'; }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 14px; }
+    .footer-links a { color: var(--slate); text-decoration: none; transition: 0.3s; font-size: 0.95rem; }
+    .footer-links a:hover { color: var(--gold-24k); transform: translateX(5px); display: inline-block; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 40px; text-align: center; color: var(--slate); font-size: 0.85rem; }
+
+    /* Breakpoints */
+    @media (max-width: 1100px) {
+      .nav-main, .nav-actions { display: none; }
+      .mobile-menu { display: block; }
+    }
+
+    @media (max-width: 480px) {
+      .card { height: 540px; padding: 35px 24px; }
+      .cta-buttons .system-btn { width: 100%; }
+      .header-container { padding: 0 10px; }
+    }
+
+    /* Scroll Reveal */
+    .reveal { opacity: 0; transform: translateY(40px); transition: 1s cubic-bezier(0.16, 1, 0.3, 1); }
+    .reveal.active { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="full-bleed-bg"></div>
+
+  <header class="system-header" id="main-header">
+    <div class="container header-container">
+      <a href="#" class="logo-system">
+        <i class="fas fa-chart-network"></i>
+        ZERIONX<span>1</span>
+      </a>
+      
+      <div class="mobile-menu" id="mobileMenuIcon">
+        <i class="fas fa-ellipsis-v"></i>
+      </div>
+      
+      <div class="system-nav">
+        <nav class="nav-main">
+          <a href="#overview">Platform</a>
+          <a href="#how-it-works">Process</a>
+          <a href="#markets">Markets</a>
+          <a href="#trust">Why Zerionx1</a>
+          <a href="/aboutus.html">About</a>
+        </nav>
+        
+        <div class="nav-actions" style="display: flex; gap: 15px;">
+          <a href="/pricing.html" class="system-btn">Pricing</a>
+          <a href="/login.html" class="system-btn system-btn-primary">Login</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-dropdown" id="mobileMenuDropdown">
+      <a href="/free.html">Free Tier</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/signup.html">Signup</a>
+      <a href="/login.html">Login</a>
+      <a href="/aboutus.html">About</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+  </header>
+
+  <section class="hero-system">
+    <video autoplay muted loop playsinline class="hero-video-system">
+      <source src="https://assets.mixkit.co/videos/preview/mixkit-financial-charts-visible-on-a-screen-43709-large.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="container">
+      <div class="reveal">
+        <h1>One Intelligence. <br><span style="color: var(--gold-24k);">All Markets.</span></h1>
+        <p class="hero-description-system">
+          Zerionx1 is a multi-market algorithmic intelligence platform built for disciplined traders.
+          Instead of predictions, we provide structured probability-based insights across Crypto, Forex, Indian Markets, Commodities and Global Indices.
+          Zerionx1 does not hold client funds and does not guarantee returns.
+          The platform delivers data-driven market intelligence while capital control and execution authority remain entirely with the user.
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+          <a href="#cta" class="system-btn system-btn-primary" style="padding: 18px 45px; font-size: 1rem;">Get Professional Access</a>
+          <a href="/free.html" class="system-btn" style="padding: 18px 45px; font-size: 1rem;">Explore 7-Day Free Tier</a>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card reveal"><span class="stat-number">150+</span><span class="stat-label">Markets Covered</span></div>
+        <div class="stat-card reveal"><span class="stat-number">24/7</span><span class="stat-label">Active Monitoring</span></div>
+        <div class="stat-card reveal"><span class="stat-number">0</span><span class="stat-label">Fund Custody</span></div>
+        <div class="stat-card reveal"><span class="stat-number">3-Layer</span><span class="stat-label">Risk Framework</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section overview-section" id="overview">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>Platform Intelligence</h2>
+        <p>Probability-based market intelligence for institutional-grade decision making</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-database"></i></div>
+          <h3 class="card-title">Data Processing</h3>
+          <div class="card-subtitle">Proprietary Algorithmic Platform</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Processes large-scale multi-market data across multiple asset classes</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Applies statistical models and probability frameworks</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Identifies structured opportunities, not predictions</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+          <h3 class="card-title">Core Principles</h3>
+          <div class="card-subtitle">Three Pillars of Intelligence</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Data integrity foundation</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Statistical significance validation</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Risk-adjusted positioning framework</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Every signal includes probability score, confidence interval, and risk parameters</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
+          <h3 class="card-title">Trading Framework</h3>
+          <div class="card-subtitle">Designed for Professional Traders</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Built for traders who understand markets are probabilistic, not predictable</span></li>
+            <li><i class="fas fa-check-circle"></i><span>We provide the intelligence framework</span></li>
+            <li><i class="fas fa-check-circle"></i><span>You maintain full execution control and capital custody at all times</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-key"></i></div>
+          <h3 class="card-title">Access Model</h3>
+          <div class="card-subtitle">Subscription-Based Intelligence</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Tiered licensing system</span></li>
+            <li><i class="fas fa-check-circle"></i><span>No performance fees, no revenue sharing, no fund management</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Pure market intelligence delivered through professional dashboard, API, and mobile interface</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="section how-it-works-section" id="how-it-works">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>Process Framework</h2>
+        <p>Three-step methodology from data to decision intelligence</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-database"></i></div>
+          <h3 class="card-title">Data Aggregation</h3>
+          <div class="card-subtitle">Real-Time Market Intelligence</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Real-time ingestion of price feeds and order book data</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Volatility metrics and cross-market correlations</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Coverage across 150+ instruments</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Proprietary cleaning and normalization ensures data integrity</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+          <h3 class="card-title">Probability Modeling</h3>
+          <div class="card-subtitle">Advanced Statistical Analysis</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Algorithmic application of statistical models</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Bayesian inference implementation</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Monte Carlo simulations</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Regime-switching analysis for market insights</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-bell"></i></div>
+          <h3 class="card-title">Intelligence Delivery</h3>
+          <div class="card-subtitle">Structured Signal Framework</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Structured signals delivered via multiple channels</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Probability scores with confidence intervals</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Comprehensive risk parameters</span></li>
+            <li><i class="fas fa-check-circle"></i><span>No execution, no fund custody - pure intelligence</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section markets-section" id="markets">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>Market Coverage</h2>
+        <p>Comprehensive intelligence across all major financial markets</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fab fa-bitcoin"></i></div>
+          <h3 class="card-title">Crypto Assets</h3>
+          <div class="card-subtitle">Digital Currency Intelligence</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Bitcoin, Ethereum, and major altcoins coverage</span></li>
+            <li><i class="fas fa-check-circle"></i><span>24/7 continuous market monitoring</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Volatility-adjusted probability models</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Real-time blockchain data integration</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-globe-americas"></i></div>
+          <h3 class="card-title">Forex Pairs</h3>
+          <div class="card-subtitle">Global Currency Intelligence</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Major, minor, and exotic currency pairs</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Advanced liquidity analysis</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Cross-pair correlation frameworks</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Central bank policy impact analysis</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+          <h3 class="card-title">Indian Markets</h3>
+          <div class="card-subtitle">Regional Market Intelligence</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>NIFTY and BANKNIFTY coverage</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Equity derivatives intelligence</span></li>
+            <li><i class="fas fa-check-circle"></i><span>MCX commodities analysis</span></li>
+            <li><i class="fas fa-check-circle"></i><span>India-specific market microstructure models</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-oil-can"></i></div>
+          <h3 class="card-title">Commodities & Indices</h3>
+          <div class="card-subtitle">Global Asset Intelligence</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Gold and Silver precious metals</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Crude Oil and energy commodities</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Global equity indices coverage</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Cross-asset correlation intelligence</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section trust-section" id="trust">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2>Platform Advantages</h2>
+        <p>Institutional-grade features built for professional traders</p>
+      </div>
+      <div class="cards-grid">
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
+          <h3 class="card-title">Capital Security</h3>
+          <div class="card-subtitle">No Fund Custody Model</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>We never hold client funds</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Your capital remains in your accounts at all times</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Full execution control maintained by user</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Complete transparency in fund management</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-project-diagram"></i></div>
+          <h3 class="card-title">Multi-Market Intelligence</h3>
+          <div class="card-subtitle">Unified Platform Solution</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Single platform covering all major asset classes</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Cross-market correlation analysis</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Unified dashboard for all market intelligence</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Consistent methodology across all markets</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-lock"></i></div>
+          <h3 class="card-title">Secure Infrastructure</h3>
+          <div class="card-subtitle">Built for reliability</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Enterprise-grade encryption standards</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Secure API architecture implementation</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Built on secure cloud infrastructure</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Regular security audits and updates</span></li>
+          </ul>
+        </div>
+        <div class="card reveal">
+          <div class="card-bg"></div>
+          <div class="card-icon"><i class="fas fa-cogs"></i></div>
+          <h3 class="card-title">Transparent Methodology</h3>
+          <div class="card-subtitle">Clear Process Documentation</div>
+          <ul class="points-list">
+            <li><i class="fas fa-check-circle"></i><span>Clear documentation of statistical models</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Probability frameworks explained</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Risk parameters fully disclosed</span></li>
+            <li><i class="fas fa-check-circle"></i><span>Methodology white papers available</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta-system" id="cta">
+    <div class="container reveal">
+      <h2 class="cta-title">Start Exploring Zerionx1</h2>
+      <p class="cta-subtitle">
+        Access a 7-day limited free tier without signup. 
+        Create an account to activate your personal license key and unlock full platform access.
+      </p>
+      <div class="cta-buttons">
+        <a href="/signup.html" class="system-btn system-btn-primary" style="padding: 18px 50px;">Create Account & Activate License</a>
+        <a href="/pricing.html" class="system-btn" style="padding: 18px 50px;">View Pricing Plans</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer-system">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-col">
+          <h4 style="color: var(--gold-24k); font-weight: 700;">ZERIONX1</h4>
+          <p style="color: var(--slate); font-size: 0.9rem; line-height: 1.6;">Probability-based algorithmic market intelligence for professional traders.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul class="footer-links">
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#how-it-works">Process</a></li>
+            <li><a href="#markets">Markets</a></li>
+            <li><a href="#trust">Why Zerionx1</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul class="footer-links">
+            <li><a href="/aboutus.html">About Us</a></li>
+            <li><a href="/pricing.html">Pricing</a></li>
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">API Access</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Risk Disclosure</a></li>
+            <li><a href="#">Compliance</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Zerionx1 Technologies. All rights reserved.</p>
+        <p style="margin-top: 15px; opacity: 0.6; line-height: 1.5; max-width: 900px; margin-inline: auto;">
+          Zerionx1 is a market intelligence platform, not an investment advisor. Trading involves substantial risk of loss. Past performance does not guarantee future results.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // Optimized Header Interaction
+      const header = document.getElementById('main-header');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 40) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      }, { passive: true });
+
+      // Clean Mobile Menu Logic
+      const mobileIcon = document.getElementById('mobileMenuIcon');
+      const mobileDropdown = document.getElementById('mobileMenuDropdown');
+      
+      mobileIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = mobileDropdown.style.display === 'block';
+        mobileDropdown.style.display = isOpen ? 'none' : 'block';
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!mobileDropdown.contains(e.target) && e.target !== mobileIcon) {
+          mobileDropdown.style.display = 'none';
+        }
+      });
+
+      // Hardware-Accelerated Reveal Effect
+      const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -60px 0px' };
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target); // Performance boost: stop observing once revealed
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+      // Scroll to Top Handler
+      const scrollUp = document.createElement('div');
+      scrollUp.innerHTML = '<i class="fas fa-arrow-up"></i>';
+      Object.assign(scrollUp.style, {
+        position: 'fixed', bottom: '30px', right: '30px',
+        width: '50px', height: '50px', background: '#C8AA6E',
+        borderRadius: '50%', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', color: '#03050A', cursor: 'pointer',
+        zIndex: '1000', opacity: '0', transition: '0.4s cubic-bezier(0.16, 1, 0.3, 1)', 
+        pointerEvents: 'none', transform: 'translateY(20px)',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.6)'
+      });
+      document.body.appendChild(scrollUp);
+
+      window.addEventListener('scroll', () => {
+        const threshold = window.scrollY > 800;
+        scrollUp.style.opacity = threshold ? '1' : '0';
+        scrollUp.style.pointerEvents = threshold ? 'auto' : 'none';
+        scrollUp.style.transform = threshold ? 'translateY(0)' : 'translateY(20px)';
+      }, { passive: true });
+
+      scrollUp.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Smooth anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            window.scrollTo({
+              top: target.offsetTop - 80,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+
+    })();
+  </script>
+</body>
+</html>
