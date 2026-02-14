@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+  <title>About Us · ZERIONX1 Probability Intelligence</title>
+  
+  <meta name="description" content="Learn about the quants and engineers behind Zerionx1. Our mission is to provide institutional-grade probability intelligence without fund custody.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --obsidian: #03050A;
+      --raisin: #0B0F16;
+      --ebony: #11161F;
+      --steel: #1E2632;
+      --gold-24k: #C8AA6E;
+      --gold-light: #E5D2AA;
+      --gold-rich: #B49450;
+      --platinum: #F2F4F8;
+      --mist: #C0C8D2;
+      --slate: #5D697A;
+      --transition-ex: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      --glass: rgba(17, 22, 31, 0.7);
+      --glass-edge: 1px solid rgba(200, 170, 110, 0.2);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--obsidian);
+      color: var(--platinum);
+      line-height: 1.7;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* Performance-Optimized Background */
+    .full-bleed-bg {
+      position: fixed; inset: 0; z-index: -3;
+      background: radial-gradient(circle at 80% 20%, #0D1219 0%, #030405 100%);
+    }
+
+    /* Header Styling */
+    .system-header {
+      position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+      padding: 20px 0; background: rgba(3, 5, 10, 0.85);
+      backdrop-filter: blur(20px); border-bottom: 1px solid rgba(200, 170, 110, 0.1);
+    }
+
+    .logo-system {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Space Grotesk', sans-serif; font-size: 24px;
+      font-weight: 700; color: white; text-decoration: none;
+    }
+    .logo-system i { color: var(--gold-24k); }
+    .logo-system span { color: var(--gold-24k); border-bottom: 2px solid var(--gold-24k); }
+
+    /* Hero Section */
+    .about-hero {
+      padding: 180px 0 100px;
+      text-align: center;
+    }
+    .about-hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.5rem, 7vw, 4.5rem);
+      line-height: 1.1; margin-bottom: 30px;
+      background: linear-gradient(135deg, #FFF 40%, var(--gold-light) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* Content Blocks */
+    .grid-layout {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; margin-bottom: 100px; align-items: center;
+    }
+
+    .content-card {
+      background: var(--glass);
+      border: var(--glass-edge);
+      padding: 50px; border-radius: 32px;
+      transition: var(--transition-ex);
+    }
+    .content-card:hover { transform: translateY(-5px); border-color: var(--gold-24k); }
+
+    h2, h3 { font-family: 'Space Grotesk'; color: var(--gold-24k); margin-bottom: 20px; }
+    p { margin-bottom: 20px; color: var(--mist); font-weight: 300; }
+
+    .highlight-list { list-style: none; }
+    .highlight-list li {
+      display: flex; gap: 15px; margin-bottom: 15px;
+      padding: 15px; background: rgba(255,255,255,0.03);
+      border-radius: 12px; border-left: 3px solid var(--gold-24k);
+    }
+
+    /* Team/Philosophy Stats */
+    .philosophy-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px; margin-top: 50px;
+    }
+
+    /* Footer */
+    .footer-simple {
+      padding: 60px 0; border-top: 1px solid rgba(255,255,255,0.05);
+      text-align: center; color: var(--slate); font-size: 0.9rem;
+    }
+
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 10px;
+      color: var(--gold-24k); text-decoration: none; font-weight: 600;
+      margin-bottom: 40px; transition: 0.3s;
+    }
+    .btn-back:hover { opacity: 0.8; transform: translateX(-5px); }
+
+    @media (max-width: 850px) {
+      .grid-layout { grid-template-columns: 1fr; }
+      .about-hero h1 { font-size: 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="full-bleed-bg"></div>
+
+  <header class="system-header">
+    <div class="container">
+      <a href="index.html" class="logo-system">
+        <i class="fas fa-chart-network"></i>
+        ZERIONX<span>1</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="about-hero">
+      <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Intelligence Platform</a>
+      <h1>Beyond Predictions.<br>Engineering Certainty.</h1>
+      <p style="max-width: 800px; margin-inline: auto; font-size: 1.2rem;">
+        Zerionx1 was founded on a singular premise: The financial markets are not a game of luck, but a landscape of evolving probabilities.
+      </p>
+    </section>
+
+    <div class="grid-layout">
+      <div>
+        <h2>The Architecture of Intelligence</h2>
+        <p>Zerionx1 is not a signal provider in the traditional sense. We are a technology layer that sits between raw market volatility and professional decision-making. Our systems process millions of data points across Crypto, Forex, and Equity markets to filter noise from signal.</p>
+        <p>Our engineers come from high-frequency trading backgrounds and quantitative research, focusing on <strong>Bayesian Inference</strong> and <strong>Regime-Switching Models</strong> to understand not just where the price is, but the environment it lives in.</p>
+      </div>
+      <div class="content-card">
+        <h3>Our Core Mandate</h3>
+        <ul class="highlight-list">
+          <li>
+            <i class="fas fa-user-shield" style="color: var(--gold-24k);"></i>
+            <span><strong>Zero Custody:</strong> We never touch your capital. You maintain 100% control through your own brokers and exchanges.</span>
+          </li>
+          <li>
+            <i class="fas fa-microchip" style="color: var(--gold-24k);"></i>
+            <span><strong>Algorithmic Rigor:</strong> Every insight is backed by a 3-layer risk framework and statistical confidence intervals.</span>
+          </li>
+          <li>
+            <i class="fas fa-eye" style="color: var(--gold-24k);"></i>
+            <span><strong>Transparency:</strong> No "black boxes." We provide the logic and the data behind every probability score.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <section style="margin-bottom: 100px;">
+      <h2 style="text-align: center; margin-bottom: 50px;">The Zerionx1 Philosophy</h2>
+      <div class="philosophy-grid">
+        <div class="content-card">
+          <i class="fas fa-balance-scale" style="font-size: 2rem; color: var(--gold-24k); margin-bottom: 20px;"></i>
+          <h3>Risk-First Thinking</h3>
+          <p>Most platforms focus on "What can I win?" We focus on "What is the probability of loss?" By defining the downside through Monte Carlo simulations, we empower traders to survive any market regime.</p>
+        </div>
+        <div class="content-card">
+          <i class="fas fa-sync" style="font-size: 2rem; color: var(--gold-24k); margin-bottom: 20px;"></i>
+          <h3>Adaptive Intelligence</h3>
+          <p>Markets aren't static. A strategy that works in a bull market fails in a sideways range. Zerionx1 automatically detects market regime shifts, adjusting our probability models in real-time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-card" style="text-align: center; margin-bottom: 100px;">
+      <h2>Institutional Grade. Individual Access.</h2>
+      <p style="max-width: 700px; margin: 0 auto 30px;">We believe that the tools used by hedge funds should be available to disciplined independent traders. Our tiered licensing ensures that whether you are an individual or an institution, you have the data you need to execute with confidence.</p>
+      <a href="index.html#pricing" class="logo-system" style="display: inline-flex; border: 1px solid var(--gold-24k); padding: 15px 35px; border-radius: 50px; font-size: 1rem;">
+        Explore Licensing Plans
+      </a>
+    </section>
+  </main>
+
+  <footer class="footer-simple">
+    <div class="container">
+      <p>© 2026 Zerionx1 Technologies. All rights reserved.</p>
+      <p style="margin-top: 10px; opacity: 0.5; font-size: 0.8rem;">
+        Zerionx1 is a market intelligence software. We do not provide financial, investment, or legal advice. 
+        Trading financial markets involves high risk.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
