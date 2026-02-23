@@ -621,8 +621,8 @@
       // --------------------------------------------------------------
       async function handleEmailConfirmation() {
         // Check if this is an email confirmation redirect
-        const hash = window.location.hash;
-        const searchParams = new URLSearchParams(window.location.search);
+        const hash = window.auth.html;
+        const searchParams = new URLSearchParams(window.auth.html);
         
         // Supabase adds #access_token=xxx or ?error=xxx to the URL after confirmation
         if (hash && hash.includes('access_token')) {
