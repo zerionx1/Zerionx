@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>ZERIONX1 · Dashboard</title>
+    
+    <!-- Supabase JS v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #03050A;
+            --bg-secondary: #0B0F16;
+            --bg-card: rgba(17, 22, 31, 0.95);
+            --bg-sidebar: rgba(8, 12, 19, 0.98);
+            --gold-primary: #C8AA6E;
+            --gold-light: #E5D2AA;
+            --gold-dark: #B49450;
+            --text-primary: #F2F4F8;
+            --text-secondary: #C0C8D2;
+            --text-muted: #5D697A;
+            --border-color: rgba(200, 170, 110, 0.15);
+            --success: #00C851;
+            --error: #ff4444;
+            --warning: #ffbb33;
+            --info: #33b5e5;
+            --glass-edge: 1px solid rgba(200, 170, 110, 0.1);
+            --gradient-gold: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            --shadow-heavy: 0 30px 60px -12px rgba(0, 0, 0, 0.8);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg-sidebar);
+            backdrop-filter: blur(20px);
+            border-right: var(--glass-edge);
+            padding: 24px 16px;
+            overflow-y: auto;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar.collapsed .sidebar-logo span,
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-logo i {
+            margin-right: 0;
+        }
+
+        .sidebar-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding: 0 12px;
+        }
+
+        .sidebar-logo i {
+            color: var(--gold-primary);
+            font-size: 28px;
+        }
+
+        .sidebar-logo span {
+            color: var(--gold-primary);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+
+        .menu-category {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 16px 12px 8px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            background: var(--gradient-gold);
+            color: var(--bg-primary);
+        }
+
+        .sidebar-menu li a i {
+            width: 20px;
+            font-size: 18px;
+        }
+
+        .collapse-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--gold-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .collapse-btn:hover {
+            background: var(--gradient-gold);
+            color: var(--bg-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 24px 32px;
+            transition: var(--transition);
+        }
+
+        .main-content.expanded {
+            margin-left: 80px;
+        }
+
+        /* Top Navbar */
+        .navbar {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: var(--glass-edge);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-greeting h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .nav-greeting span {
+            color: var(--gold-primary);
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: rgba(0, 200, 81, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .badge-pending {
+            background: rgba(255, 187, 51, 0.15);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--bg-primary);
+        }
+
+        .user-details {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-email {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--gold-primary);
+            color: var(--gold-primary);
+        }
+
+        /* Access Key Display */
+        .access-key-card {
+            background: var(--bg-card);
+            border: var(--glass-edge);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .key-label {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .key-value {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 18px;
+            color: var(--gold-primary);
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--gold-primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover {
+            background: var(--gradient-gold);
+            color: var(--bg-primary);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: var(--glass-edge);
+            border-radius: 20px;
+            padding: 24px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+            border-color: rgba(200, 170, 110, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gold-light);
+        }
+
+        .card-header i {
+            font-size: 20px;
+            color: var(--gold-primary);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* Market Panel */
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .market-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .market-symbol {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .market-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gold-primary);
+        }
+
+        .market-change {
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--error);
+        }
+
+        /* Lock Overlay */
+        .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(3, 5, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .lock-icon {
+            font-size: 48px;
+            color: var(--gold-primary);
+            margin-bottom: 16px;
+        }
+
+        .lock-message {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .lock-submessage {
+            color: var(--text-muted);
+            font-size: 14px;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.mobile-visible {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+            
+            .market-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .access-key-card {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <a href="dashboard.html" class="sidebar-logo">
+            <i class="fas fa-chart-network"></i>
+            <span>ZERIONX<span style="color: white;">1</span></span>
+        </a>
+
+        <div class="sidebar-menu">
+            <div class="menu-category">MAIN</div>
+            <ul>
+                <li><a href="dashboard.html" class="active"><i class="fas fa-home"></i> <span class="menu-text">Dashboard</span></a></li>
+                <li><a href="pricing.html"><i class="fas fa-tag"></i> <span class="menu-text">Pricing</span></a></li>
+                <li><a href="payment.html"><i class="fas fa-credit-card"></i> <span class="menu-text">Payment Status</span></a></li>
+            </ul>
+
+            <div class="menu-category">ALGO TRADING</div>
+            <ul>
+                <li><a href="strategy.html"><i class="fas fa-brain"></i> <span class="menu-text">Strategy Builder</span></a></li>
+                <li><a href="deployment.html"><i class="fas fa-rocket"></i> <span class="menu-text">Algo Deployment</span></a></li>
+                <li><a href="signals.html"><i class="fas fa-chart-line"></i> <span class="menu-text">Live Signals</span></a></li>
+                <li><a href="papertrading.html"><i class="fas fa-flask"></i> <span class="menu-text">Paper Trading</span></a></li>
+            </ul>
+
+            <div class="menu-category">ANALYTICS</div>
+            <ul>
+                <li><a href="analytics.html"><i class="fas fa-chart-pie"></i> <span class="menu-text">Trade Analytics</span></a></li>
+                <li><a href="portfolio.html"><i class="fas fa-chart-bar"></i> <span class="menu-text">Portfolio</span></a></li>
+            </ul>
+
+            <div class="menu-category">ACCESS</div>
+            <ul>
+                <li><a href="api.html"><i class="fas fa-code"></i> <span class="menu-text">API Access</span></a></li>
+                <li><a href="broker.html"><i class="fas fa-link"></i> <span class="menu-text">Broker Integration</span></a></li>
+            </ul>
+
+            <div class="menu-category">ACCOUNT</div>
+            <ul>
+                <li><a href="settings.html"><i class="fas fa-user-cog"></i> <span class="menu-text">Settings</span></a></li>
+                <li><a href="billing.html"><i class="fas fa-file-invoice"></i> <span class="menu-text">Billing</span></a></li>
+                <li><a href="support.html"><i class="fas fa-headset"></i> <span class="menu-text">Support</span></a></li>
+            </ul>
+        </div>
+
+        <button class="collapse-btn" id="collapseBtn">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-left">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" style="display: none; background: transparent; border: none; color: var(--gold-primary); font-size: 20px;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="nav-greeting">
+                    <h2>Dashboard, <span id="userName">Trader</span></h2>
+                </div>
+                <span class="badge" id="accountStatusBadge">Active</span>
+                <span class="badge" id="planBadge">Starter Plan</span>
+            </div>
+            
+            <div class="nav-right">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="navUserName"></div>
+                        <div class="user-email" id="navUserEmail"></div>
+                    </div>
+                    <div class="user-avatar" id="userAvatar">JD</div>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Access Key Display -->
+        <div class="access-key-card" id="accessKeyCard">
+            <div>
+                <div class="key-label">Your Access Key</div>
+                <div class="key-value" id="accessKeyDisplay">••••••••••••••••</div>
+            </div>
+            <button class="copy-btn" id="copyKeyBtn">
+                <i class="far fa-copy"></i> Copy Key
+            </button>
+        </div>
+
+        <!-- Dashboard Stats Grid -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-robot"></i> Active Strategies</h3>
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-value" id="activeStrategies">3</div>
+                <div class="stat-label">Running in paper trading</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-trophy"></i> Win Rate</h3>
+                    <i class="fas fa-percent"></i>
+                </div>
+                <div class="stat-value" id="winRate">68.5%</div>
+                <div class="stat-label">Last 30 days</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-wallet"></i> Account Balance</h3>
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="stat-value" id="accountBalance">₹2,50,000</div>
+                <div class="stat-label">Virtual paper balance</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-server"></i> System Status</h3>
+                    <i class="fas fa-circle" style="color: var(--success);"></i>
+                </div>
+                <div class="stat-value" id="systemStatus">Operational</div>
+                <div class="stat-label">All systems online</div>
+            </div>
+        </div>
+
+        <!-- Market Panel -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-bar"></i> Market Overview</h3>
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div class="market-grid">
+                <div class="market-item">
+                    <div class="market-symbol">BTC/USDT</div>
+                    <div class="market-price">$51,234</div>
+                    <div class="market-change positive">+2.34%</div>
+                </div>
+                <div class="market-item">
+                    <div class="market-symbol">NIFTY 50</div>
+                    <div class="market-price">22,345</div>
+                    <div class="market-change positive">+0.56%</div>
+                </div>
+                <div class="market-item">
+                    <div class="market-symbol">GOLD</div>
+                    <div class="market-price">$2,045</div>
+                    <div class="market-change negative">-0.12%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lock Overlay (shown when payment not approved) -->
+        <div class="lock-overlay" id="lockOverlay" style="display: none;">
+            <i class="fas fa-lock lock-icon"></i>
+            <div class="lock-message">Trading Engine Locked</div>
+            <div class="lock-submessage">Activate subscription to unlock institutional trading features</div>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            // Supabase initialization
+            const supabaseClient = window.supabase.createClient(
+                'https://dpmqjvaylnszykujmufv.supabase.co',
+                'sb_publishable_S2HHT0VP1Ru6Dk63ju7V-Q_FnNfX1sd'
+            );
+
+            // DOM Elements
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const collapseBtn = document.getElementById('collapseBtn');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const copyKeyBtn = document.getElementById('copyKeyBtn');
+            const lockOverlay = document.getElementById('lockOverlay');
+
+            let currentUser = null;
+            let userData = null;
+
+            // Sidebar toggle
+            collapseBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                
+                const icon = collapseBtn.querySelector('i');
+                if (sidebar.classList.contains('collapsed')) {
+                    icon.className = 'fas fa-chevron-right';
+                } else {
+                    icon.className = 'fas fa-chevron-left';
+                }
+            });
+
+            // Check authentication and load data
+            async function initDashboard() {
+                try {
+                    const { data: { session }, error } = await supabaseClient.auth.getSession();
+                    
+                    if (error) throw error;
+                    
+                    if (!session) {
+                        window.location.href = '/Zerionx/auth.html';
+                        return;
+                    }
+
+                    currentUser = session.user;
+
+                    // Fetch user data
+                    const { data: userRecord, error: fetchError } = await supabaseClient
+                        .from('user_collection')
+                        .select('*')
+                        .eq('id', currentUser.id)
+                        .maybeSingle();
+
+                    if (fetchError) {
+                        console.error('Error fetching user:', fetchError);
+                        return;
+                    }
+
+                    if (!userRecord) {
+                        // Create user record if doesn't exist
+                        const { error: insertError } = await supabaseClient
+                            .from('user_collection')
+                            .insert({
+                                id: currentUser.id,
+                                email: currentUser.email,
+                                full_name: currentUser.user_metadata?.full_name || 'Trader',
+                                phone: currentUser.user_metadata?.phone || '',
+                                payment_status: 'pending',
+                                admin_approved: false,
+                                account_status: 'pending',
+                                subscription_plan: 'Starter'
+                            });
+
+                        if (insertError) {
+                            console.error('Error creating user:', insertError);
+                            return;
+                        }
+
+                        // Refetch
+                        const { data: newRecord } = await supabaseClient
+                            .from('user_collection')
+                            .select('*')
+                            .eq('id', currentUser.id)
+                            .single();
+
+                        userData = newRecord;
+                    } else {
+                        userData = userRecord;
+                    }
+
+                    // Update UI with user data
+                    updateUI();
+
+                } catch (error) {
+                    console.error('Init error:', error);
+                }
+            }
+
+            function updateUI() {
+                if (!userData) return;
+
+                // Update user info
+                document.getElementById('userName').textContent = userData.full_name || 'Trader';
+                document.getElementById('navUserName').textContent = userData.full_name || 'User';
+                document.getElementById('navUserEmail').textContent = userData.email || '';
+                
+                const initials = (userData.full_name || 'User').split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('userAvatar').textContent = initials.slice(0, 2);
+
+                // Update badges
+                const statusBadge = document.getElementById('accountStatusBadge');
+                const planBadge = document.getElementById('planBadge');
+                
+                statusBadge.textContent = userData.account_status || 'pending';
+                statusBadge.className = `badge ${userData.account_status === 'active' ? 'badge-active' : 'badge-pending'}`;
+                
+                planBadge.textContent = userData.subscription_plan || 'Starter Plan';
+
+                // Update access key display
+                const accessKeyDisplay = document.getElementById('accessKeyDisplay');
+                if (userData.access_key) {
+                    accessKeyDisplay.textContent = userData.access_key;
+                }
+
+                // Show/hide lock overlay based on payment status
+                if (userData.payment_status !== 'approved' || !userData.access_key) {
+                    lockOverlay.style.display = 'flex';
+                } else {
+                    lockOverlay.style.display = 'none';
+                }
+            }
+
+            // Copy access key
+            copyKeyBtn.addEventListener('click', () => {
+                if (userData?.access_key) {
+                    navigator.clipboard.writeText(userData.access_key);
+                    alert('Access key copied to clipboard!');
+                }
+            });
+
+            // Logout
+            logoutBtn.addEventListener('click', async () => {
+                await supabaseClient.auth.signOut();
+                window.location.href = '/Zerionx/auth.html';
+            });
+
+            // Mobile menu
+            if (window.innerWidth <= 768) {
+                mobileMenuBtn.style.display = 'block';
+                mobileMenuBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('mobile-visible');
+                });
+            }
+
+            // Initialize
+            window.addEventListener('load', initDashboard);
+        })();
+    </script>
+</body>
+</html>
