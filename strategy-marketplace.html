@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>ZERIONX1 · strategy marketplace</title>
+    <!-- Supabase JS v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0B0F1A;
+            --bg-secondary: #0F1420;
+            --bg-card: #111827;
+            --accent-cyan: #00E5FF;
+            --accent-cyan-glow: 0 0 15px rgba(0, 229, 255, 0.3);
+            --text-primary: #FFFFFF;
+            --text-secondary: #E5E7EB;
+            --text-muted: #9CA3AF;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
+            --glass-edge: 1px solid rgba(0, 229, 255, 0.1);
+            --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: var(--transition);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 229, 255, 0.1);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: var(--glass-edge);
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFFFFF, var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 15px;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--accent-cyan);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 32px;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #FFFFFF, var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding: 8px;
+            background: rgba(17, 24, 39, 0.5);
+            border-radius: 50px;
+            border: var(--glass-edge);
+        }
+
+        .filter-btn {
+            padding: 10px 24px;
+            border-radius: 30px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            color: var(--accent-cyan);
+            background: rgba(0, 229, 255, 0.1);
+        }
+
+        .filter-btn.active {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            font-weight: 600;
+        }
+
+        /* Strategy Grid */
+        .strategy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .strategy-card {
+            background: var(--bg-card);
+            border: var(--glass-edge);
+            border-radius: 24px;
+            padding: 24px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .strategy-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-cyan);
+            box-shadow: var(--accent-cyan-glow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .strategy-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .market-badge {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .risk-low {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .risk-medium {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+            padding: 16px 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .deploy-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--accent-cyan);
+            border-radius: 30px;
+            padding: 14px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .deploy-btn:hover:not(:disabled) {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+        }
+
+        .deploy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 15, 26, 0.9);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 32px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            transform: translateY(20px);
+            transition: var(--transition);
+            box-shadow: var(--accent-cyan-glow);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal i {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .modal h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .modal p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .modal-btn {
+            background: var(--accent-cyan);
+            border: none;
+            border-radius: 30px;
+            padding: 14px 32px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--accent-cyan-glow);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: var(--glass-edge);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .navbar {
+                padding: 16px 24px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .strategy-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px;
+            }
+            
+            .page-header h1 {
+                font-size: 28px;
+            }
+            
+            .filter-bar {
+                border-radius: 12px;
+                padding: 12px;
+            }
+            
+            .filter-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">ZERIONX1</div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="#" class="active">Strategy Marketplace</a>
+            <a href="my-strategies.html">My Strategies</a>
+            <a href="broker-connect.html">Broker Connect</a>
+            <a href="subscription.html">Subscription</a>
+            <a href="profile.html">Profile</a>
+        </div>
+        <div style="color: var(--text-muted);">
+            <i class="fas fa-user-circle" style="font-size: 24px;"></i>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h1>Strategy Marketplace</h1>
+            <p>Discover and deploy institutional-grade trading algorithms across global markets</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar" id="filterBar">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="Indian Markets">🇮🇳 Indian Markets</button>
+            <button class="filter-btn" data-filter="Forex">💱 Forex</button>
+            <button class="filter-btn" data-filter="Crypto">₿ Crypto</button>
+            <button class="filter-btn" data-filter="Commodities">🛢️ Commodities</button>
+            <button class="filter-btn" data-filter="Global Indices">📊 Global Indices</button>
+            <button class="filter-btn" data-filter="Binary">⚡ Binary</button>
+        </div>
+
+        <!-- Strategy Grid -->
+        <div class="strategy-grid" id="strategyGrid"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            © 2026 ZERIONX1 — Institutional Probability Intelligence
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            <i class="fas fa-check-circle" style="color: var(--success);" id="modalIcon"></i>
+            <h3 id="modalTitle"></h3>
+            <p id="modalMessage"></p>
+            <button class="modal-btn" id="modalAction">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Supabase initialization
+            const supabase = window.supabase.createClient(
+                'https://dpmqjvaylnszykujmufv.supabase.co',
+                'sb_publishable_S2HHT0VP1Ru6Dk63ju7V-Q_FnNfX1sd'
+            );
+
+            // DOM Elements
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const strategyGrid = document.getElementById('strategyGrid');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalClose = document.getElementById('modalClose');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalAction = document.getElementById('modalAction');
+
+            // State
+            let currentUser = null;
+            let userData = null;
+            let currentFilter = 'all';
+            let selectedStrategy = null;
+
+            // Strategy Data - 10+ per market
+            const strategies = [
+                // Indian Markets (10)
+                { name: 'NIFTY Momentum Alpha', market: 'Indian Markets', risk: 'Medium', winRate: 78, monthlyReturn: 12.5, description: 'Momentum-based strategy capturing NIFTY trending moves with adaptive stop-loss.' },
+                { name: 'BANKNIFTY Options Flow', market: 'Indian Markets', risk: 'High', winRate: 71, monthlyReturn: 18.2, description: 'Tracks institutional options flow in BANKNIFTY for high-probability trades.' },
+                { name: 'Sensex Mean Reversion', market: 'Indian Markets', risk: 'Low', winRate: 82, monthlyReturn: 8.1, description: 'Statistical arbitrage on BSE Sensex using z-score mean reversion.' },
+                { name: 'MIDCAP Breakout Hunter', market: 'Indian Markets', risk: 'Medium', winRate: 74, monthlyReturn: 14.3, description: 'Identifies breakouts in mid-cap stocks with volume confirmation.' },
+                { name: 'FII/DII Tracker Pro', market: 'Indian Markets', risk: 'Medium', winRate: 76, monthlyReturn: 11.8, description: 'Tracks FII/DII activity for trend anticipation in indices.' },
+                { name: 'NIFTY Volatility Scalper', market: 'Indian Markets', risk: 'High', winRate: 69, monthlyReturn: 21.4, description: 'Scalps volatility spikes in NIFTY during market open.' },
+                { name: 'SECTOR ROTATION AI', market: 'Indian Markets', risk: 'Low', winRate: 81, monthlyReturn: 9.2, description: 'AI-powered sector rotation strategy for consistent returns.' },
+                { name: 'SMALLCAP Momentum', market: 'Indian Markets', risk: 'High', winRate: 67, monthlyReturn: 24.1, description: 'Aggressive momentum strategy for small-cap stocks.' },
+                { name: 'OPTION SELLER PRO', market: 'Indian Markets', risk: 'Medium', winRate: 88, monthlyReturn: 7.5, description: 'Sells out-of-the-money options with dynamic hedging.' },
+                { name: 'NIFTY PAIR TRADER', market: 'Indian Markets', risk: 'Low', winRate: 79, monthlyReturn: 6.8, description: 'Pairs trading between NIFTY and BANKNIFTY futures.' },
+
+                // Forex (10)
+                { name: 'EURUSD Precision Scalper', market: 'Forex', risk: 'Medium', winRate: 75, monthlyReturn: 8.2, description: 'Scalping strategy on EURUSD with micro-level entries.' },
+                { name: 'GBPJPY Momentum Rider', market: 'Forex', risk: 'High', winRate: 68, monthlyReturn: 15.7, description: 'Trend-following on GBPJPY with aggressive position sizing.' },
+                { name: 'AUDUSD Range Master', market: 'Forex', risk: 'Low', winRate: 83, monthlyReturn: 5.9, description: 'Range trading strategy for AUDUSD with Bollinger Bands.' },
+                { name: 'USDCAD Breakout System', market: 'Forex', risk: 'Medium', winRate: 72, monthlyReturn: 9.4, description: 'Breakout trading on USDCAD with volatility filters.' },
+                { name: 'NZDUSD Carry Trade', market: 'Forex', risk: 'Low', winRate: 86, monthlyReturn: 4.8, description: 'Long-term carry trade strategy on NZDUSD.' },
+                { name: 'USDCHF Mean Reverter', market: 'Forex', risk: 'Medium', winRate: 74, monthlyReturn: 7.3, description: 'Mean reversion on USDCHF using RSI extremes.' },
+                { name: 'EURGBP Arbitrage', market: 'Forex', risk: 'Low', winRate: 79, monthlyReturn: 6.2, description: 'Statistical arbitrage between EUR and GBP crosses.' },
+                { name: 'USDJPY Trend Prophet', market: 'Forex', risk: 'High', winRate: 66, monthlyReturn: 16.8, description: 'Aggressive trend following on USDJPY with ATR trailing.' },
+                { name: 'FOREX News Scalper', market: 'Forex', risk: 'High', winRate: 64, monthlyReturn: 22.3, description: 'Scalps major news events with 30-second holds.' },
+                { name: 'MAJORS Correlation', market: 'Forex', risk: 'Medium', winRate: 73, monthlyReturn: 8.9, description: 'Trades correlations between major currency pairs.' },
+
+                // Crypto (10)
+                { name: 'BTC Volatility Hunter', market: 'Crypto', risk: 'High', winRate: 65, monthlyReturn: 28.4, description: 'Captures Bitcoin volatility spikes with dynamic position sizing.' },
+                { name: 'ETH Staking Optimizer', market: 'Crypto', risk: 'Low', winRate: 92, monthlyReturn: 4.5, description: 'Optimizes ETH staking yields across protocols.' },
+                { name: 'SOL Momentum Pro', market: 'Crypto', risk: 'High', winRate: 61, monthlyReturn: 32.1, description: 'High-speed momentum trading on Solana.' },
+                { name: 'ARB Arbitrage Bot', market: 'Crypto', risk: 'Medium', winRate: 71, monthlyReturn: 11.3, description: 'Cross-exchange arbitrage on Arbitrum ecosystem.' },
+                { name: 'BTC/ETH Pair Trader', market: 'Crypto', risk: 'Medium', winRate: 74, monthlyReturn: 9.8, description: 'Pairs trading between Bitcoin and Ethereum.' },
+                { name: 'ALTSEASON Index', market: 'Crypto', risk: 'High', winRate: 63, monthlyReturn: 26.7, description: 'Basket strategy for altcoin season opportunities.' },
+                { name: 'DEFI Yield Farmer', market: 'Crypto', risk: 'Medium', winRate: 81, monthlyReturn: 7.2, description: 'Automated yield farming across top DeFi protocols.' },
+                { name: 'PERP Funding Trader', market: 'Crypto', risk: 'Low', winRate: 87, monthlyReturn: 5.1, description: 'Captures funding rates on perpetual swaps.' },
+                { name: 'BTC Halving Prophet', market: 'Crypto', risk: 'Low', winRate: 94, monthlyReturn: 3.2, description: 'Long-term accumulation around Bitcoin halving events.' },
+                { name: 'MEME Momentum', market: 'Crypto', risk: 'High', winRate: 52, monthlyReturn: 45.8, description: 'High-risk momentum on meme coins with strict stops.' },
+
+                // Commodities (10)
+                { name: 'Gold Breakout Engine', market: 'Commodities', risk: 'Medium', winRate: 73, monthlyReturn: 9.2, description: 'Tracks gold breakouts with macro economic filters.' },
+                { name: 'Silver Volatility Play', market: 'Commodities', risk: 'High', winRate: 67, monthlyReturn: 14.8, description: 'Volatility strategy on silver with industrial demand analysis.' },
+                { name: 'Crude Oil Trend Matrix', market: 'Commodities', risk: 'Medium', winRate: 71, monthlyReturn: 11.4, description: 'Trend following on WTI and Brent crude.' },
+                { name: 'Natural Gas Mean Rev', market: 'Commodities', risk: 'Low', winRate: 79, monthlyReturn: 7.3, description: 'Mean reversion on natural gas with seasonal patterns.' },
+                { name: 'Copper Global Trader', market: 'Commodities', risk: 'Low', winRate: 76, monthlyReturn: 6.5, description: 'Tracks copper as economic indicator with macro overlay.' },
+                { name: 'Platinum/Palladium', market: 'Commodities', risk: 'Medium', winRate: 72, monthlyReturn: 8.9, description: 'Pairs trade between platinum and palladium.' },
+                { name: 'AGRIC Seasonality', market: 'Commodities', risk: 'Low', winRate: 84, monthlyReturn: 5.2, description: 'Seasonal patterns in corn, wheat, and soybeans.' },
+                { name: 'Energy Spread Trader', market: 'Commodities', risk: 'Medium', winRate: 69, monthlyReturn: 10.1, description: 'Trading crack spreads in energy complex.' },
+                { name: 'Gold/Silver Ratio', market: 'Commodities', risk: 'Low', winRate: 82, monthlyReturn: 4.7, description: 'Mean reversion on gold/silver ratio.' },
+                { name: 'LME Metals Basket', market: 'Commodities', risk: 'Medium', winRate: 70, monthlyReturn: 8.3, description: 'Basket strategy for LME base metals.' },
+
+                // Global Indices (10)
+                { name: 'US30 Trend Matrix', market: 'Global Indices', risk: 'Medium', winRate: 72, monthlyReturn: 10.5, description: 'Trend following on Dow Jones with institutional flow analysis.' },
+                { name: 'NASDAQ Momentum AI', market: 'Global Indices', risk: 'High', winRate: 64, monthlyReturn: 18.7, description: 'AI-driven momentum on tech-heavy NASDAQ.' },
+                { name: 'S&P500 Vol Control', market: 'Global Indices', risk: 'Low', winRate: 85, monthlyReturn: 6.2, description: 'Volatility-controlled strategy for S&P500.' },
+                { name: 'DAX Breakout Pro', market: 'Global Indices', risk: 'Medium', winRate: 70, monthlyReturn: 9.8, description: 'Breakout trading on German DAX with volume confirmation.' },
+                { name: 'FTSE Mean Reverter', market: 'Global Indices', risk: 'Low', winRate: 78, monthlyReturn: 5.9, description: 'Mean reversion on UK FTSE with dividend adjustment.' },
+                { name: 'NIKKEI 225 Momentum', market: 'Global Indices', risk: 'High', winRate: 63, monthlyReturn: 16.4, description: 'Aggressive momentum on Japanese indices.' },
+                { name: 'HSBC China Tracker', market: 'Global Indices', risk: 'Medium', winRate: 69, monthlyReturn: 11.2, description: 'Tracks China/Hong Kong indices with macro overlay.' },
+                { name: 'EUROSTOXX Pairs', market: 'Global Indices', risk: 'Low', winRate: 77, monthlyReturn: 5.8, description: 'Pairs trading between major European indices.' },
+                { name: 'EM Index Basket', market: 'Global Indices', risk: 'High', winRate: 61, monthlyReturn: 15.9, description: 'Basket of emerging market indices with dynamic weighting.' },
+                { name: 'GLOBAL EQUITY ROTATION', market: 'Global Indices', risk: 'Medium', winRate: 74, monthlyReturn: 8.7, description: 'Rotates between global indices based on momentum.' },
+
+                // Binary Options (10)
+                { name: 'Binary Alpha Pulse', market: 'Binary', risk: 'High', winRate: 68, monthlyReturn: 23.5, description: 'High-frequency binary signals on major pairs.' },
+                { name: '60 Second Scalper', market: 'Binary', risk: 'High', winRate: 62, monthlyReturn: 31.2, description: 'Ultra-fast scalping on 60-second binaries.' },
+                { name: 'Nadex Spread Master', market: 'Binary', risk: 'Medium', winRate: 71, monthlyReturn: 12.8, description: 'Trading Nadex binary spreads with technical patterns.' },
+                { name: 'Forex Binary Flow', market: 'Binary', risk: 'Medium', winRate: 69, monthlyReturn: 14.1, description: 'Binary options on major forex pairs.' },
+                { name: 'News Binary Trader', market: 'Binary', risk: 'High', winRate: 58, monthlyReturn: 28.4, description: 'Trades binaries around high-impact news events.' },
+                { name: 'End of Day Binary', market: 'Binary', risk: 'Low', winRate: 76, monthlyReturn: 6.9, description: 'End-of-day binary strategies with high win rate.' },
+                { name: 'Binary Hedger', market: 'Binary', risk: 'Low', winRate: 82, monthlyReturn: 4.3, description: 'Hedging strategy using binary options.' },
+                { name: '5 Min Turbo', market: 'Binary', risk: 'High', winRate: 64, monthlyReturn: 26.7, description: 'Turbo binaries on 5-minute timeframes.' },
+                { name: 'Binary Straddle', market: 'Binary', risk: 'Medium', winRate: 73, monthlyReturn: 11.5, description: 'Straddle strategy on major binaries.' },
+                { name: 'Digital Options AI', market: 'Binary', risk: 'Medium', winRate: 70, monthlyReturn: 13.2, description: 'AI-powered digital options trading.' }
+            ];
+
+            // Hide loading
+            function hideLoading() {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 300);
+            }
+
+            // Show modal
+            function showModal(type, strategyName) {
+                if (type === 'success') {
+                    modalIcon.className = 'fas fa-check-circle';
+                    modalIcon.style.color = 'var(--success)';
+                    modalTitle.textContent = 'Deployment Successful';
+                    modalMessage.textContent = `${strategyName} has been deployed successfully.`;
+                    modalAction.textContent = 'View My Strategies';
+                    modalAction.onclick = () => {
+                        window.location.href = 'my-strategies.html';
+                    };
+                } else {
+                    modalIcon.className = 'fas fa-exclamation-triangle';
+                    modalIcon.style.color = 'var(--warning)';
+                    modalTitle.textContent = 'Access Restricted';
+                    modalMessage.textContent = 'Your subscription is not activated. Please complete payment to deploy strategies.';
+                    modalAction.textContent = 'Go to Subscription';
+                    modalAction.onclick = () => {
+                        window.location.href = 'subscription.html';
+                    };
+                }
+                modalOverlay.classList.add('active');
+            }
+
+            // Close modal
+            modalClose.addEventListener('click', () => {
+                modalOverlay.classList.remove('active');
+            });
+
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    modalOverlay.classList.remove('active');
+                }
+            });
+
+            // Render strategies
+            function renderStrategies(filter = 'all') {
+                const filtered = filter === 'all' 
+                    ? strategies 
+                    : strategies.filter(s => s.market === filter);
+
+                strategyGrid.innerHTML = filtered.map(strategy => `
+                    <div class="strategy-card">
+                        <div class="card-header">
+                            <span class="strategy-name">${strategy.name}</span>
+                            <span class="market-badge">${strategy.market}</span>
+                        </div>
+                        <span class="risk-badge risk-${strategy.risk.toLowerCase()}">${strategy.risk} Risk</span>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-label">Win Rate</div>
+                                <div class="stat-value">${strategy.winRate}%</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Monthly Return</div>
+                                <div class="stat-value">${strategy.monthlyReturn}%</div>
+                            </div>
+                        </div>
+                        <p class="description">${strategy.description}</p>
+                        <button class="deploy-btn" data-strategy='${JSON.stringify(strategy)}'>
+                            <i class="fas fa-rocket"></i> Deploy Strategy
+                        </button>
+                    </div>
+                `).join('');
+
+                // Add deploy handlers
+                document.querySelectorAll('.deploy-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const strategy = JSON.parse(btn.dataset.strategy);
+                        await handleDeploy(strategy);
+                    });
+                });
+            }
+
+            // Check access and deploy
+            async function handleDeploy(strategy) {
+                try {
+                    // Check session
+                    const { data: { session } } = await supabase.auth.getSession();
+                    
+                    if (!session) {
+                        window.location.replace('auth.html');
+                        return;
+                    }
+
+                    // Fetch user data with all required fields
+                    const { data: userRecord } = await supabase
+                        .from('user_collection')
+                        .select('account_status, access_key_status, feature_access')
+                        .eq('email', session.user.email)
+                        .maybeSingle();
+
+                    // Comprehensive access check - matches SQL schema
+                    if (
+                        !userRecord ||
+                        userRecord.account_status !== 'active' ||
+                        userRecord.access_key_status !== 'active' ||
+                        userRecord.feature_access !== true
+                    ) {
+                        showModal('restricted', strategy.name);
+                        return;
+                    }
+
+                    // Success - can deploy
+                    showModal('success', strategy.name);
+
+                } catch (error) {
+                    console.error('Deploy error:', error);
+                    showModal('restricted', strategy.name);
+                }
+            }
+
+            // Filter handlers
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderStrategies(currentFilter);
+                });
+            });
+
+            // Initialize
+            async function init() {
+                try {
+                    // Check session
+                    const { data: { session } } = await supabase.auth.getSession();
+                    
+                    if (!session) {
+                        window.location.replace('auth.html');
+                        return;
+                    }
+
+                    // Verify user has full platform access before showing marketplace
+                    const { data: userRecord } = await supabase
+                        .from('user_collection')
+                        .select('account_status, access_key_status, feature_access')
+                        .eq('email', session.user.email)
+                        .maybeSingle();
+
+                    // If any required field is missing/invalid, redirect to subscription
+                    if (
+                        !userRecord ||
+                        userRecord.account_status !== 'active' ||
+                        userRecord.access_key_status !== 'active' ||
+                        userRecord.feature_access !== true
+                    ) {
+                        window.location.replace('subscription.html');
+                        return;
+                    }
+
+                    // Initial render
+                    renderStrategies();
+                    hideLoading();
+
+                } catch (error) {
+                    console.error('Init error:', error);
+                    window.location.replace('auth.html');
+                }
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
