@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>ZERIONX1 · Markets Dashboard (0-Second Delay)</title>
+    <!-- Supabase JS v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- TradingView Widget Library -->
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #03020A;
+            --bg-secondary: #0A0815;
+            --bg-card: rgba(18, 16, 28, 0.85);
+            --bg-sidebar: rgba(10, 8, 21, 0.95);
+            --gold-primary: #BBA26A;
+            --gold-light: #D4C29C;
+            --gold-dark: #9F8A67;
+            --text-primary: #F0F2F5;
+            --text-secondary: #B0B7C3;
+            --text-muted: #636B7C;
+            --border-color: rgba(187, 162, 102, 0.15);
+            --success: #00A86B;
+            --error: #E54B4B;
+            --warning: #F4A261;
+            --info: #3498db;
+            --glass-edge: 1px solid rgba(187, 162, 102, 0.1);
+            --gradient-gold: linear-gradient(135deg, #BBA26A, #9F8A67);
+            --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: var(--transition);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--gold-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .dashboard-container {
+            display: none;
+            min-height: 100vh;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Menu toggle */
+        .menu-toggle {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            z-index: 1001;
+            background: var(--bg-card);
+            border: var(--glass-edge);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            display: none;
+            color: var(--gold-primary);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg-sidebar);
+            backdrop-filter: blur(20px);
+            border-right: var(--glass-edge);
+            padding: 24px 16px;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: var(--transition);
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold-dark) var(--bg-secondary);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--gold-dark);
+            border-radius: 4px;
+        }
+
+        .sidebar-logo {
+            font-family: 'Inter', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 32px;
+            padding-left: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-logo i {
+            color: var(--gold-primary);
+            margin-right: 8px;
+            font-size: 24px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            padding-left: 12px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .sidebar-menu a i {
+            width: 22px;
+            font-size: 16px;
+            color: var(--gold-primary);
+            transition: var(--transition);
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(187, 162, 102, 0.08);
+            color: var(--gold-light);
+        }
+
+        .sidebar-menu a.active {
+            background: rgba(187, 162, 102, 0.15);
+            color: var(--gold-light);
+            border-left: 3px solid var(--gold-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 24px 32px;
+            transition: var(--transition);
+        }
+
+        /* Top Navbar */
+        .navbar {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: var(--glass-edge);
+            border-radius: 20px;
+            padding: 16px 24px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .market-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 168, 107, 0.1);
+            border: 1px solid rgba(0, 168, 107, 0.3);
+            border-radius: 30px;
+            padding: 6px 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .notifications {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notifications i {
+            font-size: 20px;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--gold-primary);
+            color: var(--bg-primary);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 10px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 30px;
+            transition: var(--transition);
+        }
+
+        .user-profile:hover {
+            background: rgba(187, 162, 102, 0.1);
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--bg-primary);
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        .live-badge {
+            background: rgba(0, 168, 107, 0.15);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-badge i {
+            font-size: 10px;
+        }
+
+        /* Market Tabs */
+        .market-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .market-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 40px;
+        }
+
+        .market-tab i {
+            margin-right: 8px;
+            color: var(--gold-primary);
+        }
+
+        .market-tab:hover {
+            color: var(--gold-light);
+            background: rgba(187, 162, 102, 0.05);
+        }
+
+        .market-tab.active {
+            background: var(--gradient-gold);
+            color: var(--bg-primary);
+        }
+
+        .market-tab.active i {
+            color: var(--bg-primary);
+        }
+
+        /* Market Overview Cards */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .overview-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: var(--glass-edge);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .overview-label {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .overview-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 4px;
+        }
+
+        .overview-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--error);
+        }
+
+        /* Chart Grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: var(--glass-edge);
+            border-radius: 24px;
+            padding: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-header h3 {
+            color: var(--gold-light);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .symbol-selector {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 8px 16px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .tradingview-widget-container {
+            height: 400px;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        /* Market Depth */
+        .depth-container {
+            height: 400px;
+            overflow-y: auto;
+        }
+
+        .depth-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .depth-price {
+            color: var(--gold-primary);
+            font-weight: 600;
+        }
+
+        .depth-size {
+            color: var(--text-secondary);
+        }
+
+        .depth-total {
+            color: var(--text-muted);
+        }
+
+        .depth-bid {
+            color: var(--success);
+        }
+
+        .depth-ask {
+            color: var(--error);
+        }
+
+        /* Market Movers */
+        .movers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .mover-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: var(--glass-edge);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .mover-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .mover-header h4 {
+            color: var(--gold-light);
+        }
+
+        .mover-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mover-item:last-child {
+            border-bottom: none;
+        }
+
+        .mover-symbol {
+            font-weight: 600;
+        }
+
+        .mover-price {
+            color: var(--text-secondary);
+        }
+
+        /* Economic Calendar */
+        .calendar-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: var(--glass-edge);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .event-time {
+            color: var(--gold-primary);
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .event-name {
+            flex: 1;
+            padding: 0 20px;
+        }
+
+        .event-impact {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .impact-high {
+            background: rgba(229, 75, 75, 0.15);
+            color: var(--error);
+        }
+
+        .impact-medium {
+            background: rgba(244, 162, 97, 0.15);
+            color: var(--warning);
+        }
+
+        .impact-low {
+            background: rgba(0, 168, 107, 0.15);
+            color: var(--success);
+        }
+
+        /* No Access Message */
+        .no-access-message {
+            background: rgba(244, 162, 97, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .no-access-message i {
+            font-size: 50px;
+            color: var(--warning);
+            margin-bottom: 20px;
+        }
+
+        .no-access-message h3 {
+            color: var(--warning);
+            margin-bottom: 15px;
+        }
+
+        .no-access-message p {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+        }
+
+        .get-key-btn {
+            background: var(--gradient-gold);
+            color: var(--bg-primary);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .overview-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .movers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .menu-toggle {
+                display: block;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 24px 20px;
+            }
+            
+            .navbar {
+                padding-left: 70px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .market-tabs {
+                justify-content: center;
+            }
+            
+            .event-item {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="dashboard-container" id="dashboardContainer">
+        <div class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-chart-network"></i> ZERIONX1
+            </div>
+
+            <!-- OVERVIEW -->
+            <div class="sidebar-section">
+                <div class="section-title">OVERVIEW</div>
+                <ul class="sidebar-menu">
+                    <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="markets-dashboard.html" class="active"><i class="fas fa-globe"></i> Markets Overview</a></li>
+                </ul>
+            </div>
+
+            <!-- SUBSCRIPTION -->
+            <div class="sidebar-section">
+                <div class="section-title">SUBSCRIPTION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="subscription.html"><i class="fas fa-crown"></i> Pricing & Plans</a></li>
+                    <li><a href="payment.html"><i class="fas fa-credit-card"></i> Payment</a></li>
+                    <li><a href="access-key.html"><i class="fas fa-key"></i> Access Key</a></li>
+                </ul>
+            </div>
+
+            <!-- ALGO TRADING -->
+            <div class="sidebar-section">
+                <div class="section-title">ALGO TRADING</div>
+                <ul class="sidebar-menu">
+                    <li><a href="strategies.html"><i class="fas fa-robot"></i> Strategies</a></li>
+                    <li><a href="create-strategy.html"><i class="fas fa-plus-circle"></i> Create Strategy</a></li>
+                    <li><a href="deploy-strategy.html"><i class="fas fa-rocket"></i> Deploy Strategy</a></li>
+                    <li><a href="running-trades.html"><i class="fas fa-chart-line"></i> Running Trades</a></li>
+                    <li><a href="trade-history.html"><i class="fas fa-clock"></i> Trade History</a></li>
+                </ul>
+            </div>
+
+            <!-- BROKER CONNECTION -->
+            <div class="sidebar-section">
+                <div class="section-title">BROKER INTEGRATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="broker-connection.html"><i class="fas fa-plug"></i> Connect Brokers</a></li>
+                </ul>
+            </div>
+
+            <!-- MULTI MARKETS -->
+            <div class="sidebar-section">
+                <div class="section-title">MULTI MARKETS</div>
+                <ul class="sidebar-menu">
+                    <li><a href="indian-market.html"><i class="fas fa-rupee-sign"></i> Indian Markets</a></li>
+                    <li><a href="forex-market.html"><i class="fas fa-dollar-sign"></i> Forex</a></li>
+                    <li><a href="crypto-market.html"><i class="fas fa-bitcoin"></i> Crypto</a></li>
+                    <li><a href="commodities-market.html"><i class="fas fa-oil-can"></i> Commodities</a></li>
+                    <li><a href="binary-market.html"><i class="fas fa-chart-simple"></i> Binary Options</a></li>
+                </ul>
+            </div>
+
+            <!-- ACCOUNT -->
+            <div class="sidebar-section">
+                <div class="section-title">ACCOUNT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="contact.html"><i class="fas fa-headset"></i> Support</a></li>
+                    <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <nav class="navbar">
+                <div class="nav-left">
+                    <div class="market-status">
+                        <span class="status-dot"></span>
+                        <span>LIVE · 0s DELAY</span>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <div class="notifications">
+                        <i class="far fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="user-profile" id="userProfile">
+                        <div class="avatar" id="userAvatar">...</div>
+                        <div>
+                            <div style="font-weight:600; font-size:14px;" id="userName">Loading...</div>
+                            <div style="font-size:12px; color:var(--text-muted);" id="userEmail">...</div>
+                        </div>
+                        <i class="fas fa-chevron-down" style="font-size:12px; color:var(--text-muted);"></i>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1><i class="fas fa-globe"></i> Markets Dashboard</h1>
+                    <p>Real-time market data across all asset classes - 0 second delay</p>
+                </div>
+                <div class="live-badge">
+                    <i class="fas fa-circle"></i> LIVE DATA · 0s DELAY
+                </div>
+            </div>
+
+            <!-- Message Container -->
+            <div id="messageContainer"></div>
+
+            <!-- Access Key Check Container -->
+            <div id="accessKeyCheck"></div>
+
+            <!-- Main Content Container -->
+            <div id="mainContent">
+                <!-- Market Tabs -->
+                <div class="market-tabs" id="marketTabs">
+                    <button class="market-tab active" data-market="crypto">
+                        <i class="fas fa-bitcoin"></i> Crypto
+                    </button>
+                    <button class="market-tab" data-market="forex">
+                        <i class="fas fa-dollar-sign"></i> Forex
+                    </button>
+                    <button class="market-tab" data-market="indian">
+                        <i class="fas fa-rupee-sign"></i> Indian
+                    </button>
+                    <button class="market-tab" data-market="commodities">
+                        <i class="fas fa-oil-can"></i> Commodities
+                    </button>
+                    <button class="market-tab" data-market="binary">
+                        <i class="fas fa-chart-simple"></i> Binary
+                    </button>
+                    <button class="market-tab" data-market="us">
+                        <i class="fas fa-chart-line"></i> US Markets
+                    </button>
+                </div>
+
+                <!-- Market Overview Cards (Dynamic) -->
+                <div class="overview-grid" id="overviewGrid"></div>
+
+                <!-- Chart Grid -->
+                <div class="chart-grid">
+                    <!-- TradingView Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-chart-line"></i> <span id="chartTitle">BTC/USDT</span> Chart</h3>
+                            <select class="symbol-selector" id="symbolSelector">
+                                <option value="BTCUSDT">BTC/USDT</option>
+                                <option value="ETHUSDT">ETH/USDT</option>
+                                <option value="BNBUSDT">BNB/USDT</option>
+                                <option value="SOLUSDT">SOL/USDT</option>
+                                <option value="XRPUSDT">XRP/USDT</option>
+                                <option value="ADAUSDT">ADA/USDT</option>
+                                <option value="DOGEUSDT">DOGE/USDT</option>
+                                <option value="DOTUSDT">DOT/USDT</option>
+                                <option value="MATICUSDT">MATIC/USDT</option>
+                                <option value="LINKUSDT">LINK/USDT</option>
+                            </select>
+                        </div>
+                        <div class="tradingview-widget-container">
+                            <div id="tradingview_chart"></div>
+                        </div>
+                    </div>
+
+                    <!-- Market Depth -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-book"></i> Market Depth</h3>
+                        </div>
+                        <div class="depth-container" id="marketDepth">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Movers -->
+                <div class="movers-grid">
+                    <!-- Top Gainers -->
+                    <div class="mover-card">
+                        <div class="mover-header">
+                            <h4><i class="fas fa-arrow-up" style="color: var(--success);"></i> Top Gainers</h4>
+                        </div>
+                        <div id="topGainers">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Top Losers -->
+                    <div class="mover-card">
+                        <div class="mover-header">
+                            <h4><i class="fas fa-arrow-down" style="color: var(--error);"></i> Top Losers</h4>
+                        </div>
+                        <div id="topLosers">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Economic Calendar -->
+                <div class="calendar-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-calendar-alt"></i> Economic Calendar</h3>
+                    </div>
+                    <div id="economicCalendar">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        (function() {
+            // Supabase initialization
+            const supabase = window.supabase.createClient(
+                'https://dpmqjvaylnszykujmufv.supabase.co',
+                'sb_publishable_S2HHT0VP1Ru6Dk63ju7V-Q_FnNfX1sd'
+            );
+
+            // DOM Elements
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const dashboardContainer = document.getElementById('dashboardContainer');
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const accessKeyCheck = document.getElementById('accessKeyCheck');
+            const mainContent = document.getElementById('mainContent');
+            const marketTabs = document.querySelectorAll('.market-tab');
+            const symbolSelector = document.getElementById('symbolSelector');
+            const chartTitle = document.getElementById('chartTitle');
+            const overviewGrid = document.getElementById('overviewGrid');
+            const marketDepth = document.getElementById('marketDepth');
+            const topGainers = document.getElementById('topGainers');
+            const topLosers = document.getElementById('topLosers');
+            const economicCalendar = document.getElementById('economicCalendar');
+
+            // State
+            let currentUser = null;
+            let userData = null;
+            let hasAccess = false;
+            let currentMarket = 'crypto';
+            let currentSymbol = 'BTCUSDT';
+            let tradingViewWidget = null;
+            let priceInterval = null;
+
+            // TradingView Symbols Mapping
+            const tvSymbols = {
+                // Crypto
+                BTCUSDT: 'BINANCE:BTCUSDT',
+                ETHUSDT: 'BINANCE:ETHUSDT',
+                BNBUSDT: 'BINANCE:BNBUSDT',
+                SOLUSDT: 'BINANCE:SOLUSDT',
+                XRPUSDT: 'BINANCE:XRPUSDT',
+                ADAUSDT: 'BINANCE:ADAUSDT',
+                DOGEUSDT: 'BINANCE:DOGEUSDT',
+                DOTUSDT: 'BINANCE:DOTUSDT',
+                MATICUSDT: 'BINANCE:MATICUSDT',
+                LINKUSDT: 'BINANCE:LINKUSDT',
+                
+                // Forex
+                EURUSD: 'FX:EURUSD',
+                GBPUSD: 'FX:GBPUSD',
+                USDJPY: 'FX:USDJPY',
+                AUDUSD: 'FX:AUDUSD',
+                USDCAD: 'FX:USDCAD',
+                NZDUSD: 'FX:NZDUSD',
+                EURGBP: 'FX:EURGBP',
+                
+                // Indian
+                SENSEX: 'BSE:SENSEX',
+                NIFTY50: 'BSE:NIFTY50',
+                BANKNIFTY: 'BSE:BANKNIFTY',
+                
+                // Commodities
+                GOLD: 'TVC:GOLD',
+                SILVER: 'TVC:SILVER',
+                WTI: 'TVC:WTI',
+                BRENT: 'TVC:BRENT',
+                COPPER: 'TVC:COPPER',
+                
+                // US Markets
+                SPX: 'SP:SPX',
+                NDX: 'NASDAQ:NDX',
+                DOW: 'DJ:DJI',
+                
+                // Binary (using crypto for demo)
+                BINARY: 'BINANCE:BTCUSDT'
+            };
+
+            // Market Data
+            const marketData = {
+                crypto: [
+                    { symbol: 'BTCUSDT', name: 'Bitcoin', price: 51234.50, change: 2.34 },
+                    { symbol: 'ETHUSDT', name: 'Ethereum', price: 2890.75, change: 1.56 },
+                    { symbol: 'BNBUSDT', name: 'BNB', price: 345.20, change: -0.45 },
+                    { symbol: 'SOLUSDT', name: 'Solana', price: 102.45, change: 5.67 }
+                ],
+                forex: [
+                    { symbol: 'EURUSD', name: 'EUR/USD', price: 1.0895, change: 0.12 },
+                    { symbol: 'GBPUSD', name: 'GBP/USD', price: 1.2750, change: -0.23 },
+                    { symbol: 'USDJPY', name: 'USD/JPY', price: 148.25, change: 0.34 },
+                    { symbol: 'AUDUSD', name: 'AUD/USD', price: 0.6625, change: -0.15 }
+                ],
+                indian: [
+                    { symbol: 'SENSEX', name: 'BSE Sensex', price: 72345.67, change: 0.45 },
+                    { symbol: 'NIFTY50', name: 'Nifty 50', price: 21890.30, change: 0.32 },
+                    { symbol: 'BANKNIFTY', name: 'Bank Nifty', price: 47890.45, change: -0.21 }
+                ],
+                commodities: [
+                    { symbol: 'GOLD', name: 'Gold', price: 2045.60, change: 0.56 },
+                    { symbol: 'SILVER', name: 'Silver', price: 23.45, change: -0.34 },
+                    { symbol: 'WTI', name: 'Crude Oil', price: 72.50, change: 1.23 },
+                    { symbol: 'BRENT', name: 'Brent Oil', price: 77.85, change: 0.98 }
+                ],
+                binary: [
+                    { symbol: 'BINARY', name: 'BTC 5min', price: 100, change: 0 }
+                ],
+                us: [
+                    { symbol: 'SPX', name: 'S&P 500', price: 4789.50, change: 0.23 },
+                    { symbol: 'NDX', name: 'Nasdaq', price: 16789.30, change: 0.45 },
+                    { symbol: 'DOW', name: 'Dow Jones', price: 37890.20, change: -0.12 }
+                ]
+            };
+
+            // Helper Functions
+            function showMessage(type, message) {
+                // Implement message display
+                console.log(type, message);
+            }
+
+            function getInitials(name) {
+                if (!name) return 'U';
+                return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            }
+
+            // Initialize TradingView Widget
+            function initTradingView(symbol) {
+                const tvSymbol = tvSymbols[symbol] || 'BINANCE:BTCUSDT';
+                
+                if (tradingViewWidget) {
+                    tradingViewWidget.remove();
+                }
+
+                tradingViewWidget = new TradingView.widget({
+                    "container_id": "tradingview_chart",
+                    "width": "100%",
+                    "height": "400",
+                    "symbol": tvSymbol,
+                    "interval": "60",
+                    "timezone": "Asia/Kolkata",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "in",
+                    "toolbar_bg": "#03020A",
+                    "enable_publishing": false,
+                    "hide_side_toolbar": false,
+                    "allow_symbol_change": true,
+                    "studies": [
+                        "RSI@tv-basicstudies",
+                        "MASimple@tv-basicstudies"
+                    ],
+                    "show_popup_button": true,
+                    "popup_width": "1000",
+                    "popup_height": "650",
+                    "support_host": "https://www.tradingview.com"
+                });
+            }
+
+            // Update Overview Grid
+            function updateOverviewGrid(market) {
+                const data = marketData[market] || marketData.crypto;
+                let html = '';
+
+                data.forEach(item => {
+                    const changeClass = item.change >= 0 ? 'positive' : 'negative';
+                    const changeIcon = item.change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                    
+                    html += `
+                        <div class="overview-card" onclick="changeSymbol('${item.symbol}')">
+                            <div class="overview-label">
+                                <i class="fas fa-chart-line"></i> ${item.name}
+                            </div>
+                            <div class="overview-price">$${item.price.toLocaleString()}</div>
+                            <div class="overview-change ${changeClass}">
+                                <i class="fas ${changeIcon}"></i> ${Math.abs(item.change)}%
+                            </div>
+                        </div>
+                    `;
+                });
+
+                overviewGrid.innerHTML = html;
+            }
+
+            // Update Market Depth (Simulated)
+            function updateMarketDepth() {
+                let html = '<div class="depth-row"><span>Price</span><span>Size</span><span>Total</span></div>';
+                
+                for (let i = 0; i < 10; i++) {
+                    const bidPrice = (50000 - i * 10).toFixed(2);
+                    const askPrice = (50000 + i * 10).toFixed(2);
+                    const size = Math.floor(Math.random() * 10) + 1;
+                    
+                    html += `
+                        <div class="depth-row">
+                            <span class="depth-price depth-bid">${bidPrice}</span>
+                            <span class="depth-size">${size}.25</span>
+                            <span class="depth-total">${size * 100}</span>
+                        </div>
+                    `;
+                }
+                
+                for (let i = 0; i < 10; i++) {
+                    const askPrice = (50000 + i * 10).toFixed(2);
+                    const size = Math.floor(Math.random() * 10) + 1;
+                    
+                    html += `
+                        <div class="depth-row">
+                            <span class="depth-price depth-ask">${askPrice}</span>
+                            <span class="depth-size">${size}.75</span>
+                            <span class="depth-total">${size * 100}</span>
+                        </div>
+                    `;
+                }
+                
+                marketDepth.innerHTML = html;
+            }
+
+            // Update Market Movers
+            function updateMarketMovers() {
+                // Top Gainers
+                let gainersHtml = '';
+                const gainers = [
+                    { symbol: 'SOLUSDT', name: 'Solana', price: 102.45, change: 5.67 },
+                    { symbol: 'BTCUSDT', name: 'Bitcoin', price: 51234.50, change: 2.34 },
+                    { symbol: 'ETHUSDT', name: 'Ethereum', price: 2890.75, change: 1.56 }
+                ];
+                
+                gainers.forEach(g => {
+                    gainersHtml += `
+                        <div class="mover-item">
+                            <div>
+                                <span class="mover-symbol">${g.symbol}</span>
+                                <span class="mover-price"> $${g.price}</span>
+                            </div>
+                            <span class="positive">+${g.change}%</span>
+                        </div>
+                    `;
+                });
+                topGainers.innerHTML = gainersHtml;
+
+                // Top Losers
+                let losersHtml = '';
+                const losers = [
+                    { symbol: 'BNBUSDT', name: 'BNB', price: 345.20, change: -0.45 },
+                    { symbol: 'XRPUSDT', name: 'XRP', price: 0.58, change: -0.32 },
+                    { symbol: 'ADAUSDT', name: 'Cardano', price: 0.45, change: -0.21 }
+                ];
+                
+                losers.forEach(l => {
+                    losersHtml += `
+                        <div class="mover-item">
+                            <div>
+                                <span class="mover-symbol">${l.symbol}</span>
+                                <span class="mover-price"> $${l.price}</span>
+                            </div>
+                            <span class="negative">${l.change}%</span>
+                        </div>
+                    `;
+                });
+                topLosers.innerHTML = losersHtml;
+            }
+
+            // Update Economic Calendar
+            function updateEconomicCalendar() {
+                const events = [
+                    { time: '09:30', name: 'US CPI Data', impact: 'high', actual: '3.2%', forecast: '3.1%' },
+                    { time: '14:00', name: 'FOMC Meeting Minutes', impact: 'high', actual: 'Pending', forecast: '-' },
+                    { time: '18:00', name: 'Crude Oil Inventories', impact: 'medium', actual: '-2.1M', forecast: '-1.8M' },
+                    { time: '19:30', name: 'ECB President Speech', impact: 'medium', actual: 'Pending', forecast: '-' },
+                    { time: '20:00', name: 'US Jobless Claims', impact: 'low', actual: '218K', forecast: '220K' }
+                ];
+
+                let html = '';
+                events.forEach(event => {
+                    const impactClass = event.impact === 'high' ? 'impact-high' : 
+                                      event.impact === 'medium' ? 'impact-medium' : 'impact-low';
+                    
+                    html += `
+                        <div class="event-item">
+                            <span class="event-time">${event.time}</span>
+                            <span class="event-name">${event.name}</span>
+                            <span class="event-impact ${impactClass}">${event.actual}</span>
+                        </div>
+                    `;
+                });
+                
+                economicCalendar.innerHTML = html;
+            }
+
+            // Change Symbol
+            window.changeSymbol = function(symbol) {
+                currentSymbol = symbol;
+                symbolSelector.value = symbol;
+                chartTitle.textContent = symbol;
+                initTradingView(symbol);
+            };
+
+            // Price Update Simulation (Real-time)
+            function startPriceSimulation() {
+                if (priceInterval) clearInterval(priceInterval);
+                
+                priceInterval = setInterval(() => {
+                    // Update crypto prices randomly
+                    marketData.crypto.forEach(item => {
+                        const change = (Math.random() - 0.5) * 2;
+                        item.price = item.price * (1 + change/100);
+                        item.change = (item.change + change/2).toFixed(2);
+                    });
+                    
+                    // Refresh the overview if on crypto tab
+                    if (currentMarket === 'crypto') {
+                        updateOverviewGrid('crypto');
+                    }
+                }, 3000); // Update every 3 seconds
+            }
+
+            // Check Access Key
+            async function checkAccessKey() {
+                try {
+                    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                    
+                    if (sessionError) throw sessionError;
+                    
+                    if (!session) {
+                        window.location.replace('auth.html');
+                        return;
+                    }
+
+                    currentUser = session.user;
+
+                    const { data, error } = await supabase
+                        .from('user_collection')
+                        .select('*')
+                        .eq('email', currentUser.email)
+                        .single();
+
+                    if (error) {
+                        console.error('Error loading user:', error);
+                        return;
+                    }
+
+                    userData = data;
+
+                    // Update navbar
+                    document.getElementById('userName').textContent = userData.full_name || 'Trader';
+                    document.getElementById('userEmail').textContent = currentUser.email || '';
+                    document.getElementById('userAvatar').textContent = getInitials(userData.full_name || 'User');
+
+                    hasAccess = userData.access_key_status === 'active' && userData.access_key;
+
+                    if (!hasAccess) {
+                        accessKeyCheck.innerHTML = `
+                            <div class="no-access-message">
+                                <i class="fas fa-lock"></i>
+                                <h3>Access Key Required</h3>
+                                <p>You need an active access key to view real-time market data.</p>
+                                <a href="access-key.html" class="get-key-btn">
+                                    <i class="fas fa-key"></i> Activate Access Key
+                                </a>
+                            </div>
+                        `;
+                        mainContent.style.display = 'none';
+                    } else {
+                        accessKeyCheck.innerHTML = '';
+                        mainContent.style.display = 'block';
+                        
+                        // Initialize everything
+                        initTradingView('BTCUSDT');
+                        updateOverviewGrid('crypto');
+                        updateMarketDepth();
+                        updateMarketMovers();
+                        updateEconomicCalendar();
+                        startPriceSimulation();
+                    }
+
+                } catch (error) {
+                    console.error('Auth error:', error);
+                } finally {
+                    hideLoading();
+                }
+            }
+
+            // Hide loading
+            function hideLoading() {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                    dashboardContainer.style.display = 'block';
+                }, 300);
+            }
+
+            // Event Listeners
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 1024) {
+                    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                        sidebar.classList.remove('active');
+                    }
+                }
+            });
+
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await supabase.auth.signOut();
+                window.location.replace('auth.html');
+            });
+
+            // Market tabs
+            marketTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    marketTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentMarket = tab.dataset.market;
+                    
+                    // Update overview grid
+                    updateOverviewGrid(currentMarket);
+                    
+                    // Update symbol selector options based on market
+                    const options = symbolSelector.options;
+                    for (let i = 0; i < options.length; i++) {
+                        options[i].style.display = 'none';
+                    }
+                    
+                    // Show relevant symbols
+                    marketData[currentMarket].forEach(item => {
+                        for (let i = 0; i < options.length; i++) {
+                            if (options[i].value === item.symbol) {
+                                options[i].style.display = 'block';
+                            }
+                        }
+                    });
+                    
+                    // Select first symbol
+                    if (marketData[currentMarket].length > 0) {
+                        const firstSymbol = marketData[currentMarket][0].symbol;
+                        symbolSelector.value = firstSymbol;
+                        chartTitle.textContent = firstSymbol;
+                        initTradingView(firstSymbol);
+                    }
+                });
+            });
+
+            // Symbol selector
+            symbolSelector.addEventListener('change', (e) => {
+                currentSymbol = e.target.value;
+                chartTitle.textContent = currentSymbol;
+                initTradingView(currentSymbol);
+            });
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 1024) {
+                    sidebar.classList.remove('active');
+                }
+            });
+
+            // Initialize
+            checkAccessKey();
+        })();
+    </script>
+</body>
+</html>
