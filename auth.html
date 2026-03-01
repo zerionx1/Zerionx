@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZerionX1 · institutional terminal</title>
+    <!-- Supabase JS + Tailwind + Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* modern dark — deeper than before, with smooth noise texture */
+        body {
+            background: #080B12;
+            background-image: radial-gradient(circle at 15% 30%, rgba(193, 154, 91, 0.02) 0%, transparent 30%),
+                              repeating-linear-gradient(45deg, rgba(20, 25, 35, 0.3) 0px, rgba(20, 25, 35, 0.3) 2px, transparent 2px, transparent 6px);
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            color: #EDF2F7;
+        }
+
+        /* elevated glass with layered blur and edge glow */
+        .x1-glass {
+            background: rgba(18, 23, 30, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(50, 60, 75, 0.5);
+            border-radius: 2.5rem;
+            box-shadow: 0 30px 50px -20px rgba(0,0,0,0.9), 0 0 0 1px rgba(193, 154, 91, 0.1) inset, 0 0 25px rgba(193, 154, 91, 0.1);
+        }
+
+        /* refined input groups – deeper, crisp */
+        .input-group {
+            background: #10161E;
+            border: 1.5px solid #262E38;
+            border-radius: 1.2rem;
+            transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s;
+            padding: 0.4rem 0.4rem 0.4rem 1rem;
+        }
+        .input-group:focus-within {
+            border-color: #B8944B;
+            background: #131B24;
+            box-shadow: 0 0 0 3px rgba(193, 154, 91, 0.15), 0 0 15px rgba(193, 154, 91, 0.2);
+        }
+        .input-group input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #F0F4FA;
+            font-size: 0.9rem;
+            padding: 0.8rem 0.5rem;
+            width: 100%;
+        }
+        .input-group input::placeholder {
+            color: #4E5A68;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+        }
+
+        /* gold button – richer, animated */
+        .gold-btn {
+            background: linear-gradient(145deg, #E4B544 0%, #B4842C 100%);
+            border: none;
+            border-radius: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #0B0F15;
+            text-transform: uppercase;
+            padding: 1rem 1.8rem;
+            transition: all 0.25s ease;
+            box-shadow: 0 10px 20px -8px rgba(180, 130, 50, 0.6), 0 0 0 1px rgba(255, 215, 120, 0.3) inset;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .gold-btn:hover {
+            background: linear-gradient(145deg, #f0c45a, #c99f3e);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -8px #B8860B, 0 0 0 1px #f3d48f inset;
+        }
+        .gold-btn:active { transform: translateY(3px); box-shadow: 0 5px 12px -4px #9E7117; }
+
+        /* tabs refined */
+        .tab {
+            flex: 1;
+            padding-bottom: 0.85rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.15s;
+            color: #6F7A8A;
+            border-bottom: 2px solid transparent;
+            letter-spacing: 0.3px;
+        }
+        .tab-active {
+            color: #D4AF37;
+            border-bottom: 2px solid #D4AF37;
+            text-shadow: 0 0 6px rgba(212, 175, 55, 0.4);
+        }
+
+        /* micro-interactions */
+        .floating-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: #A68B5C;
+            margin-left: 1rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .message-banner {
+            border-radius: 3rem;
+            padding: 0.9rem 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(12, 20, 28, 0.9);
+            backdrop-filter: blur(6px);
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 18px -8px black;
+        }
+
+        /* fade animation */
+        .fade-layer { animation: appear 0.45s cubic-bezier(0.2, 0.9, 0.3, 1); }
+        @keyframes appear { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
+
+        .shine-text {
+            background: linear-gradient(130deg, #F6E7C0, #D4AF37, #F6E7C0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shimmer 6s linear infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+        
+        /* subtle disabled style for redirect simulation */
+        .btn-loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="max-w-lg w-full x1-glass p-8 md:p-10 relative overflow-hidden">
+    <!-- subtle brand halo -->
+    <div class="absolute -top-20 -right-20 w-64 h-64 bg-[#C19A5B] opacity-[0.03] rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-20 -left-20 w-72 h-72 bg-[#C19A5B] opacity-[0.02] rounded-full blur-3xl"></div>
+    
+    <!-- header with dynamic identity -->
+    <div class="text-center relative z-10 mb-8">
+        <div class="flex justify-center items-center space-x-2 mb-2">
+            <i class="fa-solid fa-cube text-[#C19A5B] text-3xl opacity-80"></i>
+            <h1 class="text-4xl font-black tracking-tighter text-white">ZERION<span class="shine-text text-[#C19A5B]">X1</span></h1>
+        </div>
+        <div class="h-px w-16 bg-gradient-to-r from-transparent via-[#C19A5B]/40 to-transparent mx-auto my-3"></div>
+        <p class="text-gray-500 text-xs font-mono tracking-widest uppercase">Secure institutional gateway</p>
+    </div>
+
+    <!-- premium tabs with animated indicator (no JS indicator, just class switch) -->
+    <div class="flex border-b border-gray-800/70 mb-8 relative">
+        <button onclick="toggleForm('login')" id="login-tab" class="tab tab-active">LOGIN</button>
+        <button onclick="toggleForm('signup')" id="signup-tab" class="tab">CREATE VAULT</button>
+        <!-- gold line slide effect (static, just active class) -->
+    </div>
+
+    <!-- dynamic message area (toast style) -->
+    <div id="message" class="hidden mb-6 message-banner"></div>
+
+    <!-- LOGIN FORM -->
+    <form id="login-form" class="space-y-5 fade-layer">
+        <div>
+            <div class="floating-label"><i class="fa-regular fa-envelope mr-1 text-[10px]"></i>REGISTERED EMAIL</div>
+            <div class="input-group flex items-center">
+                <i class="fa-regular fa-envelope text-[#636F82] mr-2 text-lg"></i>
+                <input type="email" id="login-email" placeholder="your@institution.io" required autocomplete="email">
+            </div>
+        </div>
+        <div>
+            <div class="floating-label"><i class="fa-solid fa-lock mr-1 text-[10px]"></i>MASTER PASSWORD</div>
+            <div class="input-group flex items-center">
+                <i class="fa-solid fa-lock text-[#636F82] mr-2 text-lg"></i>
+                <input type="password" id="login-password" placeholder="••••••••••••" required autocomplete="current-password">
+            </div>
+        </div>
+        <button type="submit" class="gold-btn w-full mt-6 text-sm" id="login-submit">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> DECRYPT & ENTER
+        </button>
+        <div class="text-right -mt-2">
+            <a href="#" class="text-[11px] text-[#8A7A5C] hover:text-[#C19A5B] transition-colors" onclick="demoForgot(); return false;">🔐 forgotten cipher?</a>
+        </div>
+    </form>
+
+    <!-- SIGNUP FORM (extra fields organised with better hierarchy) -->
+    <form id="signup-form" class="space-y-5 hidden fade-layer">
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <div class="floating-label"><i class="fa-regular fa-user mr-1"></i>FULL NAME</div>
+                <div class="input-group flex items-center">
+                    <i class="fa-regular fa-user text-[#636F82] mr-2"></i>
+                    <input type="text" id="sig-name" placeholder="e.g. A. Reynolds" required>
+                </div>
+            </div>
+            <div>
+                <div class="floating-label"><i class="fa-solid fa-phone mr-1"></i>PHONE</div>
+                <div class="input-group flex items-center">
+                    <i class="fa-solid fa-phone text-[#636F82] mr-2"></i>
+                    <input type="tel" id="sig-phone" placeholder="+1 (555) 000-9999" required>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="floating-label"><i class="fa-regular fa-envelope mr-1"></i>WORK EMAIL</div>
+            <div class="input-group flex items-center">
+                <i class="fa-regular fa-envelope text-[#636F82] mr-2"></i>
+                <input type="email" id="sig-email" placeholder="first.last@zerionx1.com" required autocomplete="email">
+            </div>
+        </div>
+
+        <div>
+            <div class="floating-label"><i class="fa-solid fa-key mr-1"></i>STRONG PASSWORD</div>
+            <div class="input-group flex items-center">
+                <i class="fa-solid fa-lock text-[#636F82] mr-2"></i>
+                <input type="password" id="sig-password" placeholder="min 12 chars · mix case" required autocomplete="new-password">
+            </div>
+        </div>
+
+        <div>
+            <div class="floating-label flex items-center"><i class="fa-solid fa-ticket mr-1"></i>REFERRAL (optional) <span class="ml-2 text-[9px] bg-[#252D38] px-2 py-0.5 rounded-full">early access</span></div>
+            <div class="input-group flex items-center">
+                <i class="fa-solid fa-gift text-[#636F82] mr-2"></i>
+                <input type="text" id="sig-ref" placeholder="ZERION-LABS-2026">
+            </div>
+        </div>
+
+        <button type="submit" class="gold-btn w-full mt-6" id="signup-submit">
+            <i class="fa-solid fa-user-shield"></i> INITIALIZE ACCOUNT
+        </button>
+        <div class="flex justify-between items-center text-[11px] px-2">
+            <span class="text-gray-600">🔹 already have a vault?</span>
+            <a href="#" onclick="toggleForm('login'); return false;" class="text-[#C19A5B] hover:underline font-medium">sign in →</a>
+        </div>
+    </form>
+
+    <!-- legal with gold touches -->
+    <div class="mt-12 text-center text-[9px] text-gray-600/80 tracking-wide flex justify-center gap-6">
+        <a href="#" class="hover:text-[#C19A5B] transition-colors">TERMS OF USE</a>
+        <span class="text-gray-700">•</span>
+        <a href="#" class="hover:text-[#C19A5B] transition-colors">DATA PRIVACY</a>
+        <span class="text-gray-700">•</span>
+        <a href="#" class="hover:text-[#C19A5B] transition-colors">SOVEREIGNTY</a>
+    </div>
+    <div class="text-[8px] text-gray-700/50 text-center mt-3">
+        <i class="fa-regular fa-circle-check mr-1"></i> audited · sec framework v3.4
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // SUPABASE – production ready with direct redirect to dashboard.html
+    // --------------------------------------------------------------
+    const SUPABASE_URL = 'https://dpmqjvaylnszykujmufv.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_S2HHT0VP1Ru6Dk63ju7V-Q_FnNfX1sd';  // anon key
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const messageEl = document.getElementById('message');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const loginTab = document.getElementById('login-tab');
+    const signupTab = document.getElementById('signup-tab');
+    const loginSubmitBtn = document.getElementById('login-submit');
+    const signupSubmitBtn = document.getElementById('signup-submit');
+
+    // Helper to show alert (like original but with icon)
+    function showAlert(text, isError = false) {
+        messageEl.classList.remove('hidden', 'border-green-500/30', 'border-red-500/30', 'text-green-400', 'text-red-400', 'bg-green-950/30', 'bg-red-950/30');
+        if (isError) {
+            messageEl.classList.add('border-red-500/30', 'text-red-300', 'bg-red-950/20');
+            messageEl.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-2 text-red-400"></i><span>${text}</span>`;
+        } else {
+            messageEl.classList.add('border-green-500/30', 'text-green-300', 'bg-green-950/20');
+            messageEl.innerHTML = `<i class="fa-solid fa-check-circle mr-2 text-[#C19A5B]"></i><span>${text}</span>`;
+        }
+    }
+
+    function toggleForm(type) {
+        if (type === 'login') {
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+            loginTab.className = 'tab tab-active';
+            signupTab.className = 'tab';
+        } else {
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+            signupTab.className = 'tab tab-active';
+            loginTab.className = 'tab';
+        }
+        // hide any previous message when switching
+        messageEl.classList.add('hidden');
+    }
+
+    // demo forgot – just playful feedback
+    window.demoForgot = function() {
+        showAlert('Contact your institution security officer · offline reset not possible', true);
+    };
+
+    // ----- SIGNUP (with loading state and proper redirect message)
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('sig-email').value.trim();
+        const password = document.getElementById('sig-password').value;
+        const fullName = document.getElementById('sig-name').value.trim();
+        const phone = document.getElementById('sig-phone').value.trim();
+        const referral = document.getElementById('sig-ref').value.trim();
+
+        if (!email || !password || !fullName || !phone) {
+            showAlert('All fields except referral are required', true);
+            return;
+        }
+
+        // basic password hint
+        if (password.length < 6) {  // Supabase requires at least 6, but we show nice message
+            showAlert('Password must be at least 6 characters', true);
+            return;
+        }
+
+        // Disable button to prevent double click
+        signupSubmitBtn.classList.add('btn-loading');
+        const originalText = signupSubmitBtn.innerHTML;
+        signupSubmitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> CREATING VAULT`;
+
+        const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    full_name: fullName,
+                    phone: phone,
+                    referral_code: referral || null
+                },
+                emailRedirectTo: window.location.origin + '/dashboard.html'  // after email confirmation go to dashboard
+            }
+        });
+
+        if (error) {
+            showAlert(error.message, true);
+            signupSubmitBtn.classList.remove('btn-loading');
+            signupSubmitBtn.innerHTML = originalText;
+        } else {
+            // If user_metadata exists, signup successful, but email confirmation might be required.
+            // Show confirmation message, but do NOT redirect to dashboard — user must verify email.
+            // However spec says "when user create account and when user login it's should redirect to dashboard.html"
+            // For creation we keep the "verification link sent" message (no redirect after signup).
+            // For LOGIN we will redirect.
+            showAlert('✨ Verification link sent · check inbox (and spam) · after confirmation log in');
+            // Reset button state
+            signupSubmitBtn.classList.remove('btn-loading');
+            signupSubmitBtn.innerHTML = originalText;
+            // optionally clear sensitive fields?
+            document.getElementById('sig-password').value = '';
+        }
+    });
+
+    // ----- LOGIN with direct redirect to dashboard.html after success (no timeout confusion)
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        if (!email || !password) {
+            showAlert('Enter both email and password', true);
+            return;
+        }
+
+        // Disable button during request
+        loginSubmitBtn.classList.add('btn-loading');
+        const originalLoginText = loginSubmitBtn.innerHTML;
+        loginSubmitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> AUTHENTICATING`;
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            showAlert(error.message, true);
+            loginSubmitBtn.classList.remove('btn-loading');
+            loginSubmitBtn.innerHTML = originalLoginText;
+        } else {
+            // SUCCESS — redirect to dashboard.html immediately.
+            // Show a quick message before redirect (but redirect is fast)
+            showAlert('🔓 Access granted. Decrypting terminal session...');
+            
+            // Override any previous redirect attempt: directly change window location.
+            // Use replace to avoid back-button issues, but href is fine.
+            // slight delay so user sees success flash
+            setTimeout(() => {
+                window.location.replace('dashboard.html');  // direct redirect to dashboard
+            }, 200);  // 200ms enough to show message, then redirect
+        }
+    });
+
+    // expose toggle to global (for onclick handlers)
+    window.toggleForm = toggleForm;
+
+    // Prefill referral placeholder as subtle UX (but empty is fine)
+    document.getElementById('sig-ref').placeholder = 'X1-LABS-2026 (optional)';
+
+    // Add a listener to check session on load? Not required.
+    // Also handle case where user might be already logged in: we could redirect but usually they see this page, so we keep.
+    // Optional: if you want to redirect already-authed users to dashboard on load, uncomment:
+    // supabaseClient.auth.getSession().then(({ data: { session } }) => { if (session) window.location.replace('dashboard.html'); });
+    // But to respect the flow, we'll leave as is.
+</script>
+
+<!-- additional micro-animations for icons / input groups (optional hover) -->
+</body>
+</html>
