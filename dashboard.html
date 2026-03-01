@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZERIONX1 · Institutional Dashboard</title>
+    <!-- Supabase JS v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <!-- Tailwind CSS via CDN + custom gold accent -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter (same as auth) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background: #0B0E14;
+            color: #E2E8F0;
+        }
+        /* custom gold */
+        .gold-bg {
+            background: #C19A5B;
+        }
+        .gold-text {
+            color: #C19A5B;
+        }
+        .gold-border {
+            border-color: #C19A5B;
+        }
+        .card-bg {
+            background: #161B22;
+        }
+        .card-bg-secondary {
+            background: #1C2128;
+        }
+        /* glassmorphism */
+        .glass-card {
+            background: rgba(22, 27, 34, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #2D333B;
+            border-radius: 1.5rem;
+        }
+        .glass-card:hover {
+            border-color: #C19A5B;
+            transition: all 0.2s;
+        }
+        /* sidebar active */
+        .sidebar-link.active {
+            background: rgba(193, 154, 91, 0.15);
+            border-left: 3px solid #C19A5B;
+            color: #C19A5B;
+        }
+        .sidebar-link {
+            border-left: 3px solid transparent;
+        }
+        /* skeleton animation */
+        .skeleton {
+            background: linear-gradient(90deg, #1C2128 25%, #2D333B 50%, #1C2128 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 0.75rem;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        /* overlay for disabled */
+        .premium-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(11, 14, 20, 0.85);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1.5rem;
+            z-index: 10;
+            color: #C19A5B;
+            font-weight: 500;
+            text-align: center;
+            padding: 1rem;
+        }
+        /* fade animation */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* custom scroll */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0B0E14; }
+        ::-webkit-scrollbar-thumb { background: #2D333B; border-radius: 12px; }
+        ::-webkit-scrollbar-thumb:hover { background: #C19A5B; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- loading overlay (skeleton) -->
+    <div id="globalLoading" class="fixed inset-0 bg-[#0B0E14] z-50 flex items-center justify-center transition-opacity duration-500">
+        <div class="w-12 h-12 border-4 border-[#2D333B] border-t-[#C19A5B] rounded-full animate-spin"></div>
+    </div>
+
+    <!-- main dashboard container (hidden until data loaded) -->
+    <div id="dashboardRoot" class="hidden min-h-screen flex fade-in">
+
+        <!-- === LEFT SIDEBAR (desktop) === -->
+        <aside class="fixed left-0 top-0 h-screen w-72 card-bg border-r border-[#2D333B] overflow-y-auto hidden lg:block z-30">
+            <div class="p-6">
+                <!-- logo -->
+                <div class="flex items-center gap-2 mb-8">
+                    <i class="fas fa-chart-line text-3xl gold-text"></i>
+                    <span class="text-2xl font-bold tracking-tight text-white">ZERION<span class="gold-text">X1</span></span>
+                </div>
+                <!-- navigation -->
+                <nav class="space-y-1">
+                    <a href="#" data-page="dashboard" class="sidebar-link active flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-home w-6 gold-text"></i>Dashboard</a>
+                    <a href="#" data-page="strategy-marketplace" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-store w-6 gold-text"></i>Strategy Marketplace</a>
+                    <a href="#" data-page="strategy-builder" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-cube w-6 gold-text"></i>Strategy Builder</a>
+                    <a href="#" data-page="my-strategies" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-layer-group w-6 gold-text"></i>My Strategies</a>
+                    <a href="#" data-page="live-trading" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-play-circle w-6 gold-text"></i>Live Trading</a>
+                    <a href="#" data-page="market-terminal" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-terminal w-6 gold-text"></i>Market Terminal</a>
+                    <a href="#" data-page="portfolio" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-chart-pie w-6 gold-text"></i>Portfolio</a>
+                    <a href="#" data-page="broker" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-link w-6 gold-text"></i>Broker Connections</a>
+                    <a href="#" data-page="subscription" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-crown w-6 gold-text"></i>Subscription</a>
+                    <a href="#" data-page="profile" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-user w-6 gold-text"></i>Profile Settings</a>
+                    <hr class="border-[#2D333B] my-4">
+                    <a href="#" id="logoutBtn" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg transition-all"><i class="fas fa-sign-out-alt w-6 gold-text"></i>Logout</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- mobile sidebar toggle + overlay -->
+        <div class="lg:hidden fixed top-4 left-4 z-40">
+            <button id="mobileMenuBtn" class="card-bg p-3 rounded-xl border border-[#2D333B]"><i class="fas fa-bars gold-text text-xl"></i></button>
+        </div>
+        <!-- mobile sidebar drawer -->
+        <div id="mobileSidebar" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/70" id="mobileOverlay"></div>
+            <aside class="absolute left-0 top-0 h-full w-72 card-bg border-r border-[#2D333B] overflow-y-auto p-6">
+                <div class="flex items-center justify-between mb-8">
+                    <span class="text-2xl font-bold text-white">ZERION<span class="gold-text">X1</span></span>
+                    <button id="closeMobileSidebar"><i class="fas fa-times text-xl text-[#E2E8F0]"></i></button>
+                </div>
+                <nav class="space-y-1">
+                    <a href="#" data-page="dashboard" class="sidebar-link active flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-home w-6 gold-text"></i>Dashboard</a>
+                    <a href="#" data-page="strategy-marketplace" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-store w-6 gold-text"></i>Strategy Marketplace</a>
+                    <a href="#" data-page="strategy-builder" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-cube w-6 gold-text"></i>Strategy Builder</a>
+                    <a href="#" data-page="my-strategies" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-layer-group w-6 gold-text"></i>My Strategies</a>
+                    <a href="#" data-page="live-trading" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-play-circle w-6 gold-text"></i>Live Trading</a>
+                    <a href="#" data-page="market-terminal" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-terminal w-6 gold-text"></i>Market Terminal</a>
+                    <a href="#" data-page="portfolio" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-chart-pie w-6 gold-text"></i>Portfolio</a>
+                    <a href="#" data-page="broker" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-link w-6 gold-text"></i>Broker Connections</a>
+                    <a href="#" data-page="subscription" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-crown w-6 gold-text"></i>Subscription</a>
+                    <a href="#" data-page="profile" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-user w-6 gold-text"></i>Profile Settings</a>
+                    <hr class="border-[#2D333B] my-4">
+                    <a href="#" id="mobileLogoutBtn" class="sidebar-link flex items-center gap-3 px-4 py-3 text-[#E2E8F0] hover:bg-[#1C2128] rounded-r-lg"><i class="fas fa-sign-out-alt w-6 gold-text"></i>Logout</a>
+                </nav>
+            </aside>
+        </div>
+
+        <!-- === MAIN CONTENT (right side) === -->
+        <main class="flex-1 lg:ml-72 p-6 transition-all duration-300" id="mainContent">
+            <!-- top header bar (user info) -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div class="flex items-center gap-4">
+                    <i class="fas fa-chart-line text-3xl gold-text"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Welcome back, <span id="displayName" class="gold-text">—</span></h1>
+                        <p class="text-[#8B949E] text-sm" id="displayEmail"></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="card-bg-secondary px-4 py-2 rounded-full text-sm border border-[#2D333B]">
+                        <i class="fas fa-crown gold-text mr-1"></i> Plan: <span id="planName">free</span>
+                    </span>
+                    <span class="card-bg-secondary px-4 py-2 rounded-full text-sm border border-[#2D333B]">
+                        <i class="fas fa-key gold-text mr-1"></i> Access: <span id="accessStatus">inactive</span>
+                    </span>
+                    <button id="logoutBtnSmall" class="card-bg-secondary p-3 rounded-full border border-[#2D333B] hover:border-[#C19A5B] transition">
+                        <i class="fas fa-sign-out-alt gold-text"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- dynamic dashboard content (cards / sections) -->
+            <div id="dashboardContent">
+                <!-- skeleton will be shown while loading, then replaced by real data cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" id="statCardsSkeleton">
+                    <div class="card-bg p-6 rounded-2xl border border-[#2D333B] h-32 skeleton"></div>
+                    <div class="card-bg p-6 rounded-2xl border border-[#2D333B] h-32 skeleton"></div>
+                    <div class="card-bg p-6 rounded-2xl border border-[#2D333B] h-32 skeleton"></div>
+                    <div class="card-bg p-6 rounded-2xl border border-[#2D333B] h-32 skeleton"></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="card-bg p-6 rounded-2xl border border-[#2D333B] h-48 skeleton"></div>
+                    <div class="card-bg p-6 rounded-2xl border border-[#2D333B] h-48 skeleton"></div>
+                </div>
+            </div>
+
+            <!-- cards populated by javascript will be injected here -->
+            <div id="realDashboard" class="hidden fade-in"></div>
+        </main>
+    </div>
+
+    <script>
+        (async function() {
+            // ---------- SUPABASE INIT ----------
+            const SUPABASE_URL = 'https://dpmqjvaylnszykujmufv.supabase.co';
+            const SUPABASE_ANON_KEY = 'sb_publishable_S2HHT0VP1Ru6Dk63ju7V-Q_FnNfX1sd';
+            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: { persistSession: true }
+            });
+
+            // ---------- DOM elements ----------
+            const globalLoading = document.getElementById('globalLoading');
+            const dashboardRoot = document.getElementById('dashboardRoot');
+            const realDashboard = document.getElementById('realDashboard');
+            const dashboardContent = document.getElementById('dashboardContent');
+            const displayName = document.getElementById('displayName');
+            const displayEmail = document.getElementById('displayEmail');
+            const planName = document.getElementById('planName');
+            const accessStatus = document.getElementById('accessStatus');
+
+            // ---------- Helper functions ----------
+            function showErrorAndRedirect(msg) {
+                alert(msg || 'Session expired. Please login again.');
+                window.location.href = 'auth.html';
+            }
+
+            // format currency
+            function formatINR(num) {
+                return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(num || 0);
+            }
+
+            // compute win rate
+            function winRate(profit, loss) {
+                if (!profit && !loss) return '0%';
+                const total = Math.abs(profit) + Math.abs(loss);
+                if (total === 0) return '0%';
+                const wins = profit > 0 ? profit : 0;
+                return ((wins / total) * 100).toFixed(1) + '%';
+            }
+
+            // render dashboard cards with real user data
+            function renderDashboard(data) {
+                const hasActiveAccess = data.access_key_status === 'active' && data.feature_access !== false;
+                const isAccessRestricted = !hasActiveAccess;
+
+                // status badge colors
+                const accessBadgeClass = hasActiveAccess ? 'text-green-400 border-green-400/30 bg-green-400/10' : 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10';
+
+                const html = `
+                    <!-- stats cards row -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="card-bg p-6 rounded-2xl border border-[#2D333B] hover:border-[#C19A5B] transition relative">
+                            ${isAccessRestricted ? '<div class="premium-overlay"><i class="fas fa-lock mr-2"></i>Subscription inactive</div>' : ''}
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-[#8B949E] text-sm mb-1"><i class="fas fa-robot gold-text mr-1"></i>Strategies Created</p>
+                                    <p class="text-3xl font-bold text-white">${data.strategies_created || 0}</p>
+                                </div>
+                                <span class="text-xs bg-[#1C2128] px-2 py-1 rounded-full text-[#8B949E]">max ${data.max_strategy_limit || '∞'}</span>
+                            </div>
+                            <p class="text-xs text-[#8B949E] mt-2"><i class="fas fa-play-circle gold-text mr-1"></i>${data.strategies_running || 0} running</p>
+                        </div>
+                        <div class="card-bg p-6 rounded-2xl border border-[#2D333B] hover:border-[#C19A5B] transition relative">
+                            ${isAccessRestricted ? '<div class="premium-overlay"><i class="fas fa-lock mr-2"></i>Subscription inactive</div>' : ''}
+                            <p class="text-[#8B949E] text-sm mb-1"><i class="fas fa-chart-line gold-text mr-1"></i>Total Trades</p>
+                            <p class="text-3xl font-bold text-white">${data.total_trades || 0}</p>
+                            <p class="text-xs text-[#8B949E] mt-2"><i class="fas fa-clock gold-text mr-1"></i>lifetime</p>
+                        </div>
+                        <div class="card-bg p-6 rounded-2xl border border-[#2D333B] hover:border-[#C19A5B] transition relative">
+                            ${isAccessRestricted ? '<div class="premium-overlay"><i class="fas fa-lock mr-2"></i>Subscription inactive</div>' : ''}
+                            <p class="text-[#8B949E] text-sm mb-1"><i class="fas fa-arrow-up gold-text mr-1"></i>Total Profit</p>
+                            <p class="text-3xl font-bold text-green-400">${formatINR(data.total_profit || 0)}</p>
+                            <p class="text-xs text-[#8B949E] mt-2"><i class="fas fa-arrow-down gold-text mr-1"></i>Loss ${formatINR(data.total_loss || 0)}</p>
+                        </div>
+                        <div class="card-bg p-6 rounded-2xl border border-[#2D333B] hover:border-[#C19A5B] transition relative">
+                            ${isAccessRestricted ? '<div class="premium-overlay"><i class="fas fa-lock mr-2"></i>Subscription inactive</div>' : ''}
+                            <p class="text-[#8B949E] text-sm mb-1"><i class="fas fa-percent gold-text mr-1"></i>Win Rate</p>
+                            <p class="text-3xl font-bold text-white">${winRate(data.total_profit, data.total_loss)}</p>
+                            <p class="text-xs text-[#8B949E] mt-2"><i class="fas fa-wallet gold-text mr-1"></i>Paper balance: ${formatINR(data.paper_balance || 100000)}</p>
+                        </div>
+                    </div>
+                    <!-- account summary / feature access cards -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 relative">
+                            ${isAccessRestricted ? '<div class="premium-overlay"><i class="fas fa-lock mr-2"></i>Activate access key</div>' : ''}
+                            <h3 class="text-lg font-semibold mb-4 flex items-center"><i class="fas fa-crown gold-text mr-2"></i>Subscription details</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between border-b border-[#2D333B] pb-2">
+                                    <span class="text-[#8B949E]">Plan</span>
+                                    <span class="font-medium text-white">${data.plan_name || 'free'}</span>
+                                </div>
+                                <div class="flex justify-between border-b border-[#2D333B] pb-2">
+                                    <span class="text-[#8B949E]">Account status</span>
+                                    <span class="text-green-400">${data.account_status || 'active'}</span>
+                                </div>
+                                <div class="flex justify-between border-b border-[#2D333B] pb-2">
+                                    <span class="text-[#8B949E]">Access key</span>
+                                    <span class="${accessBadgeClass} px-2 py-0.5 rounded-full text-xs border">${data.access_key_status || 'inactive'}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-[#8B949E]">Feature access</span>
+                                    <span class="text-white">${data.feature_access ? 'Full' : 'Restricted'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6 relative">
+                            ${isAccessRestricted ? '<div class="premium-overlay"><i class="fas fa-lock mr-2"></i>Activate to trade</div>' : ''}
+                            <h3 class="text-lg font-semibold mb-4 flex items-center"><i class="fas fa-rocket gold-text mr-2"></i>Quick actions</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button class="bg-[#1C2128] p-4 rounded-xl border border-[#2D333B] hover:border-[#C19A5B] transition text-center" onclick="window.location.href='strategy-builder.html'">
+                                    <i class="fas fa-plus gold-text text-xl mb-1"></i>
+                                    <div class="text-xs">Build</div>
+                                </button>
+                                <button class="bg-[#1C2128] p-4 rounded-xl border border-[#2D333B] hover:border-[#C19A5B] transition text-center" onclick="window.location.href='live-trading.html'">
+                                    <i class="fas fa-play gold-text text-xl mb-1"></i>
+                                    <div class="text-xs">Live trade</div>
+                                </button>
+                                <button class="bg-[#1C2128] p-4 rounded-xl border border-[#2D333B] hover:border-[#C19A5B] transition text-center col-span-2" onclick="window.location.href='broker.html'">
+                                    <i class="fas fa-link gold-text text-xl mb-1"></i>
+                                    <div class="text-xs">Connect broker</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                realDashboard.innerHTML = html;
+                realDashboard.classList.remove('hidden');
+                dashboardContent.classList.add('hidden'); // hide skeletons
+            }
+
+            // ---------- SESSION CHECK & DATA LOAD ----------
+            try {
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    showErrorAndRedirect('No active session');
+                    return;
+                }
+
+                const user = session.user;
+                displayEmail.innerText = user.email;
+
+                // fetch real user data from user_collection
+                const { data: userData, error: fetchError } = await supabaseClient
+                    .from('user_collection')
+                    .select('*')
+                    .eq('email', user.email)
+                    .single();
+
+                if (fetchError || !userData) {
+                    console.warn('User not found in collection, using defaults', fetchError);
+                    // still continue with empty object to avoid crash, but ideally they have a record
+                }
+
+                const userRecord = userData || {
+                    full_name: user.user_metadata?.full_name || 'Trader',
+                    plan_name: 'free',
+                    account_status: 'active',
+                    access_key_status: 'inactive',
+                    feature_access: false,
+                    strategies_created: 0,
+                    strategies_running: 0,
+                    max_strategy_limit: 3,
+                    total_trades: 0,
+                    total_profit: 0,
+                    total_loss: 0,
+                    paper_balance: 100000
+                };
+
+                // update top bar
+                displayName.innerText = userRecord.full_name || user.email?.split('@')[0] || 'Trader';
+                planName.innerText = userRecord.plan_name || 'free';
+                accessStatus.innerText = userRecord.access_key_status || 'inactive';
+
+                // render dashboard
+                renderDashboard(userRecord);
+
+                // hide global loader, show dashboard
+                globalLoading.style.opacity = '0';
+                setTimeout(() => {
+                    globalLoading.style.display = 'none';
+                    dashboardRoot.classList.remove('hidden');
+                }, 300);
+
+            } catch (err) {
+                console.error('Dashboard init error:', err);
+                showErrorAndRedirect('Authentication error');
+            }
+
+            // ---------- LOGOUT FUNCTION ----------
+            async function logout() {
+                await supabaseClient.auth.signOut();
+                window.location.href = 'auth.html';
+            }
+
+            // attach logout to all logout buttons
+            document.querySelectorAll('#logoutBtn, #logoutBtnSmall, #mobileLogoutBtn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    logout();
+                });
+            });
+
+            // ---------- MOBILE SIDEBAR ----------
+            const mobileSidebar = document.getElementById('mobileSidebar');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeMobile = document.getElementById('closeMobileSidebar');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileSidebar.classList.remove('hidden');
+                });
+            }
+            if (closeMobile) {
+                closeMobile.addEventListener('click', () => {
+                    mobileSidebar.classList.add('hidden');
+                });
+            }
+            if (mobileOverlay) {
+                mobileOverlay.addEventListener('click', () => {
+                    mobileSidebar.classList.add('hidden');
+                });
+            }
+
+            // ---------- SIDEBAR ACTIVE LINK HANDLING (for demo) ----------
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // remove active from all
+                    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    // in a real app, you would navigate or load content
+                    // for now, just keep dashboard active visually
+                    if (!this.getAttribute('data-page') || this.getAttribute('data-page') === 'dashboard') {
+                        // already dashboard
+                    } else {
+                        alert(`Navigate to ${this.innerText} (page would open in production)`);
+                    }
+                });
+            });
+
+        })();
+    </script>
+</body>
+</html>
