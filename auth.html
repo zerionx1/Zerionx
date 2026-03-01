@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZERIONX1 | Institutional Auth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080a0c;
+            --card-bg: rgba(17, 20, 24, 0.8);
+            --primary-gold: #c5a059;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --error-red: #ff5f5f;
+            --success-green: #4ade80;
+            --border-color: rgba(197, 160, 89, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(197, 160, 89, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(197, 160, 89, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .logo-area h1 {
+            font-size: 28px;
+            letter-spacing: 4px;
+            color: var(--primary-gold);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .logo-area p {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        .tab-group {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            cursor: pointer;
+            color: var(--text-dim);
+            transition: 0.3s;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .tab.active {
+            color: var(--primary-gold);
+            border-bottom: 2px solid var(--primary-gold);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-gold);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-gold);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+
+        #status-msg {
+            margin-top: 20px;
+            font-size: 13px;
+            min-height: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .error { color: var(--error-red); background: rgba(255, 95, 95, 0.1); display: block !important; }
+        .success { color: var(--success-green); background: rgba(74, 222, 128, 0.1); display: block !important; }
+
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #000;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            animation: rotation 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="glass-card">
+            <div class="logo-area">
+                <h1>ZERIONX1</h1>
+                <p>Algorithmic Trading Systems</p>
+            </div>
+
+            <div class="tab-group">
+                <div class="tab active" id="login-tab" onclick="switchTab('login')">LOGIN</div>
+                <div class="tab" id="signup-tab" onclick="switchTab('signup')">SIGN UP</div>
+            </div>
+
+            <form id="auth-form">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="institutional@access.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn-primary">
+                    <span id="btn-loader" class="loader hidden"></span>
+                    <span id="btn-text">SIGN IN</span>
+                </button>
+            </form>
+
+            <div id="status-msg"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            sendEmailVerification, 
+            onAuthStateChanged,
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDD7AaxOgm_0zn-aD22CdTQp3UA1BitQ5Y",
+            authDomain: "zerionx.firebaseapp.com",
+            databaseURL: "https://zerionx-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "zerionx",
+            storageBucket: "zerionx.firebasestorage.app",
+            messagingSenderId: "196864621108",
+            appId: "1:196864621108:web:69949ad179e34e0007e861",
+            measurementId: "G-NHCKGGVRF7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let mode = 'login';
+
+        // Tab Switching Logic
+        window.switchTab = (target) => {
+            mode = target;
+            document.getElementById('login-tab').classList.toggle('active', target === 'login');
+            document.getElementById('signup-tab').classList.toggle('active', target === 'signup');
+            document.getElementById('btn-text').innerText = target === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT';
+            document.getElementById('status-msg').className = '';
+            document.getElementById('status-msg').innerText = '';
+        };
+
+        // Session Handling
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await user.reload();
+                if (user.emailVerified) {
+                    await syncUserData(user);
+                    window.location.href = 'dashboard.html';
+                }
+            }
+        });
+
+        async function syncUserData(user) {
+            const userRef = doc(db, "user_collection", user.uid);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
+                    uid: user.uid,
+                    email: user.email,
+                    created_at: serverTimestamp(),
+                    account_status: "pending",
+                    role: "user",
+                    plan_name: "free",
+                    access_key: "",
+                    payment_status: "unpaid",
+                    platform_access: false,
+                    total_profit: 0,
+                    total_trades: 0,
+                    win_rate: 0,
+                    strategy_count: 0
+                });
+            }
+        }
+
+        const authForm = document.getElementById('auth-form');
+        const statusMsg = document.getElementById('status-msg');
+        const btnText = document.getElementById('btn-text');
+        const btnLoader = document.getElementById('btn-loader');
+        const submitBtn = document.getElementById('submit-btn');
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // UI Loading State
+            submitBtn.disabled = true;
+            btnLoader.classList.remove('hidden');
+            statusMsg.className = '';
+            statusMsg.innerText = '';
+
+            try {
+                if (mode === 'signup') {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    await sendEmailVerification(userCredential.user);
+                    statusMsg.innerText = "Verification email sent. Please verify to continue.";
+                    statusMsg.className = "success";
+                    await signOut(auth); // Force them to login after verification
+                } else {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+
+                    if (!user.emailVerified) {
+                        statusMsg.innerText = "Please verify your email before logging in.";
+                        statusMsg.className = "error";
+                        await signOut(auth);
+                    } else {
+                        await syncUserData(user);
+                        window.location.href = 'dashboard.html';
+                    }
+                }
+            } catch (error) {
+                let message = "An error occurred.";
+                if (error.code === 'auth/user-not-found') message = "Account not found.";
+                if (error.code === 'auth/wrong-password') message = "Invalid credentials.";
+                if (error.code === 'auth/email-already-in-use') message = "Email already registered.";
+                if (error.code === 'auth/invalid-email') message = "Invalid email format.";
+                if (error.code === 'auth/weak-password') message = "Password too weak (min 6 chars).";
+                
+                statusMsg.innerText = message;
+                statusMsg.className = "error";
+            } finally {
+                submitBtn.disabled = false;
+                btnLoader.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
