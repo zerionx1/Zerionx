@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZERIONX1 · Authentication</title>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #03020A;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #0A0815;
+            padding: 40px;
+            border-radius: 24px;
+            width: 400px;
+            border: 1px solid rgba(187,162,102,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #BBA26A;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(0,0,0,0.3);
+            padding: 4px;
+            border-radius: 50px;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 50px;
+            color: #B0B7C3;
+            font-weight: 500;
+        }
+        .tab.active {
+            background: #BBA26A;
+            color: #03020A;
+        }
+        .form {
+            display: none;
+        }
+        .form.active {
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(187,162,102,0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #BBA26A;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: #BBA26A;
+            border: none;
+            border-radius: 12px;
+            color: #03020A;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #D4C29C;
+        }
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .alert-error {
+            background: rgba(229,75,75,0.1);
+            border: 1px solid #E54B4B;
+            color: #E54B4B;
+            display: block;
+        }
+        .alert-success {
+            background: rgba(0,168,107,0.1);
+            border: 1px solid #00A86B;
+            color: #00A86B;
+            display: block;
+        }
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #03020A;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ZERIONX1</h1>
+
+        <div class="tabs">
+            <div id="tabLogin" class="tab active" onclick="switchTab('login')">Login</div>
+            <div id="tabSignup" class="tab" onclick="switchTab('signup')">Sign Up</div>
+        </div>
+
+        <div id="alertMessage" class="alert"></div>
+
+        <!-- LOGIN FORM -->
+        <div id="loginForm" class="form active">
+            <input type="email" id="loginEmail" placeholder="Email Address">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button id="loginBtn" onclick="handleLogin()">Sign In</button>
+        </div>
+
+        <!-- SIGNUP FORM -->
+        <div id="signupForm" class="form">
+            <input type="email" id="signupEmail" placeholder="Email Address">
+            <input type="password" id="signupPassword" placeholder="Password (min 6 chars)">
+            <input type="tel" id="signupPhone" placeholder="Phone Number">
+            <button id="signupBtn" onclick="handleSignup()">Create Account</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== SUPABASE INIT =====
+        const supabase = window.supabase.createClient(
+            'https://dpmqjvaylnszykujmufv.supabase.co',
+            'sb_publishable_S2HHT0VP1Ru6Dk63ju7V-Q_FnNfX1sd'
+        );
+
+        // ===== CHECK SESSION =====
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) window.location.href = 'dashboard.html';
+        });
+
+        // ===== TAB SWITCHING =====
+        window.switchTab = function(tab) {
+            document.getElementById('tabLogin').className = tab === 'login' ? 'tab active' : 'tab';
+            document.getElementById('tabSignup').className = tab === 'signup' ? 'tab active' : 'tab';
+            document.getElementById('loginForm').className = tab === 'login' ? 'form active' : 'form';
+            document.getElementById('signupForm').className = tab === 'signup' ? 'form active' : 'form';
+        };
+
+        // ===== SHOW ALERT =====
+        function showAlert(msg, type) {
+            const alert = document.getElementById('alertMessage');
+            alert.textContent = msg;
+            alert.className = `alert alert-${type}`;
+            setTimeout(() => alert.style.display = 'none', 3000);
+        }
+
+        // ===== LOGIN =====
+        window.handleLogin = async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showAlert('Fill all fields', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>';
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                showAlert(err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = 'Sign In';
+            }
+        };
+
+        // ===== SIGNUP =====
+        window.handleSignup = async function() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const phone = document.getElementById('signupPhone').value;
+            
+            if (!email || !password || !phone) {
+                showAlert('Fill all fields', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showAlert('Password too short', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('signupBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>';
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { phone },
+                        emailRedirectTo: window.location.origin + '/auth.html'
+                    }
+                });
+                if (error) throw error;
+                showAlert('Verification email sent!', 'success');
+                btn.disabled = false;
+                btn.innerHTML = 'Create Account';
+            } catch (err) {
+                showAlert(err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = 'Create Account';
+            }
+        };
+
+        // ===== FIXED: No extra parentheses! =====
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                window.location.href = 'dashboard.html';
+            }
+        }); // <-- NO () HERE!
+    </script>
+</body>
+</html>
