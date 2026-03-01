@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZerionX1 · Institutional Terminal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #05070A;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(193, 154, 91, 0.05) 0%, transparent 50%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 2px);
+            background-size: 100% 100%, 100% 4px;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EDF2F7;
+        }
+
+        .x1-glass {
+            background: rgba(10, 14, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(193, 154, 91, 0.2);
+            border-radius: 1.5rem;
+            box-shadow: 0 0 80px rgba(0,0,0,0.8), inset 0 0 20px rgba(193, 154, 91, 0.05);
+        }
+
+        .input-group {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #2D3748;
+            border-radius: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-group:focus-within {
+            border-color: #B8944B;
+            box-shadow: 0 0 15px rgba(184, 148, 75, 0.2);
+            background: rgba(184, 148, 75, 0.02);
+        }
+
+        .gold-btn {
+            background: linear-gradient(135deg, #D4AF37 0%, #8A6D29 100%);
+            color: #05070A;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gold-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(184, 148, 75, 0.3);
+            filter: brightness(1.1);
+        }
+
+        .gold-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .tab-active {
+            color: #D4AF37;
+            border-bottom: 2px solid #D4AF37;
+        }
+
+        .shine-text {
+            background: linear-gradient(90deg, #fff, #D4AF37, #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 4s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .loader {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #000;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="max-w-md w-full x1-glass p-8 md:p-10 relative">
+    <div class="text-center mb-10">
+        <div class="flex justify-center items-center gap-3 mb-2">
+            <i class="fa-solid fa-shield-halved text-[#D4AF37] text-3xl"></i>
+            <h1 class="text-3xl font-extrabold tracking-tighter uppercase">Zerion<span class="shine-text">X1</span></h1>
+        </div>
+        <p class="text-[10px] font-mono text-gray-500 tracking-[0.3em] uppercase">Encrypted Institutional Node</p>
+    </div>
+
+    <div class="flex border-b border-gray-800 mb-8">
+        <button onclick="switchTab('login')" id="login-tab" class="flex-1 pb-3 text-sm font-bold tracking-widest tab-active transition-all">ACCESS</button>
+        <button onclick="switchTab('signup')" id="signup-tab" class="flex-1 pb-3 text-sm font-bold tracking-widest text-gray-500 transition-all">INITIALIZE</button>
+    </div>
+
+    <div id="status-msg" class="hidden mb-6 p-4 rounded-lg text-xs font-mono border flex items-center gap-3 animate-pulse"></div>
+
+    <form id="login-form" class="space-y-6">
+        <div class="space-y-1">
+            <label class="text-[10px] text-[#B8944B] font-bold ml-1">TERMINAL ID (EMAIL)</label>
+            <div class="input-group flex items-center px-4 py-3">
+                <i class="fa-regular fa-envelope text-gray-600"></i>
+                <input type="email" id="login-email" class="bg-transparent border-none outline-none w-full ml-3 text-sm" placeholder="operator@zerion.io" required>
+            </div>
+        </div>
+        <div class="space-y-1">
+            <label class="text-[10px] text-[#B8944B] font-bold ml-1">CYPHER KEY</label>
+            <div class="input-group flex items-center px-4 py-3">
+                <i class="fa-solid fa-key text-gray-600"></i>
+                <input type="password" id="login-password" class="bg-transparent border-none outline-none w-full ml-3 text-sm" placeholder="••••••••••••" required>
+            </div>
+        </div>
+        <button type="submit" id="login-btn" class="gold-btn w-full py-4 rounded-xl text-xs uppercase flex items-center justify-center gap-2">
+            <span>Decrypt & Authenticate</span>
+        </button>
+    </form>
+
+    <form id="signup-form" class="space-y-4 hidden">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
+                <label class="text-[10px] text-[#B8944B] font-bold ml-1">OPERATOR NAME</label>
+                <div class="input-group flex items-center px-4 py-3">
+                    <input type="text" id="reg-name" class="bg-transparent border-none outline-none w-full text-sm" placeholder="John Doe" required>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] text-[#B8944B] font-bold ml-1">PHONE</label>
+                <div class="input-group flex items-center px-4 py-3">
+                    <input type="tel" id="reg-phone" class="bg-transparent border-none outline-none w-full text-sm" placeholder="+1..." required>
+                </div>
+            </div>
+        </div>
+        <div class="space-y-1">
+            <label class="text-[10px] text-[#B8944B] font-bold ml-1">INSTITUTIONAL EMAIL</label>
+            <div class="input-group flex items-center px-4 py-3">
+                <input type="email" id="reg-email" class="bg-transparent border-none outline-none w-full text-sm" placeholder="name@company.com" required>
+            </div>
+        </div>
+        <div class="space-y-1">
+            <label class="text-[10px] text-[#B8944B] font-bold ml-1">CREATE MASTER KEY</label>
+            <div class="input-group flex items-center px-4 py-3">
+                <input type="password" id="reg-password" class="bg-transparent border-none outline-none w-full text-sm" placeholder="Min 12 chars" required>
+            </div>
+        </div>
+        <button type="submit" id="signup-btn" class="gold-btn w-full py-4 rounded-xl text-xs uppercase flex items-center justify-center gap-2">
+            <span>Initialize Vault</span>
+        </button>
+    </form>
+
+    <div class="mt-10 text-center">
+        <p class="text-[9px] text-gray-600 font-mono">SECURE BY ZERION LABS PROTOCOL · 2026</p>
+    </div>
+</div>
+
+<script>
+    // --- SUPABASE CONFIG ---
+    const SUPABASE_URL = 'https://dpmqjvaylnszykujmufv.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_S2HHT0VP1Ru6Dk63ju7V-Q_FnNfX1sd'; // Verify this key in your dashboard
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const statusMsg = document.getElementById('status-msg');
+
+    // UI Toggle
+    function switchTab(type) {
+        const isLogin = type === 'login';
+        document.getElementById('login-form').classList.toggle('hidden', !isLogin);
+        document.getElementById('signup-form').classList.toggle('hidden', isLogin);
+        document.getElementById('login-tab').className = isLogin ? 'flex-1 pb-3 text-sm font-bold tracking-widest tab-active' : 'flex-1 pb-3 text-sm font-bold tracking-widest text-gray-500';
+        document.getElementById('signup-tab').className = !isLogin ? 'flex-1 pb-3 text-sm font-bold tracking-widest tab-active' : 'flex-1 pb-3 text-sm font-bold tracking-widest text-gray-500';
+        statusMsg.classList.add('hidden');
+    }
+
+    function notify(text, type = 'info') {
+        statusMsg.classList.remove('hidden', 'bg-red-900/20', 'border-red-500/50', 'text-red-400', 'bg-green-900/20', 'border-green-500/50', 'text-green-400');
+        if (type === 'error') {
+            statusMsg.classList.add('bg-red-900/20', 'border-red-500/50', 'text-red-400');
+            statusMsg.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${text}`;
+        } else {
+            statusMsg.classList.add('bg-green-900/20', 'border-green-500/50', 'text-green-400');
+            statusMsg.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${text}`;
+        }
+    }
+
+    // --- LOGIC: LOGIN ---
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('login-btn');
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loader"></span> Authenticating...';
+
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) throw error;
+
+            notify("ACCESS GRANTED. DECRYPTING...");
+            
+            // Redirect after a short delay for "tech effect"
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1200);
+
+        } catch (err) {
+            notify(err.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = 'Decrypt & Authenticate';
+        }
+    });
+
+    // --- LOGIC: SIGNUP ---
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('signup-btn');
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loader"></span> Processing...';
+
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: document.getElementById('reg-name').value,
+                        phone: document.getElementById('reg-phone').value
+                    }
+                }
+            });
+
+            if (error) throw error;
+
+            notify("VAULT CREATED. CHECK EMAIL FOR ACTIVATION.");
+            btn.innerHTML = 'Email Sent';
+            
+        } catch (err) {
+            notify(err.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = 'Initialize Vault';
+        }
+    });
+</script>
+
+</body>
+</html>
