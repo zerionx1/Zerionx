@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZERIONX1 · Institutional Trading Platform</title>
+  
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0B0E14;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #E2E8F0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    
+    .premium-card {
+      background: #161B22;
+      border: 1px solid #2D333B;
+      border-radius: 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 520px;
+      transition: border-color 0.2s ease;
+    }
+    
+    .premium-card:hover {
+      border-color: #3D4450;
+    }
+    
+    .brand-section {
+      text-align: center;
+      padding: 2rem 2rem 1.5rem 2rem;
+      border-bottom: 1px solid #2D333B;
+    }
+    
+    .brand-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #FFFFFF;
+      margin-bottom: 0.25rem;
+    }
+    
+    .brand-accent {
+      color: #C19A5B;
+      font-weight: 700;
+    }
+    
+    .brand-subtitle {
+      color: #8B949E;
+      font-size: 0.875rem;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+    }
+    
+    .tab-container {
+      display: flex;
+      padding: 0 2rem;
+      gap: 2rem;
+      border-bottom: 1px solid #2D333B;
+    }
+    
+    .tab-item {
+      padding: 1rem 0 0.75rem 0;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #8B949E;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    
+    .tab-item.active {
+      color: #C19A5B;
+      border-bottom-color: #C19A5B;
+    }
+    
+    .form-container {
+      padding: 2rem;
+    }
+    
+    .input-icon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      color: #8B949E;
+      font-size: 1rem;
+      z-index: 1;
+    }
+    
+    .input-icon-field {
+      width: 100%;
+      background: #1C2128;
+      border: 1px solid #2D333B;
+      border-radius: 12px;
+      padding: 0.875rem 1rem 0.875rem 2.75rem;
+      color: #E2E8F0;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .input-icon-field:focus {
+      outline: none;
+      border-color: #C19A5B;
+      background: #222832;
+    }
+    
+    .input-icon-field::placeholder {
+      color: #6E7681;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      color: #8B949E;
+      cursor: pointer;
+      transition: color 0.2s;
+      z-index: 1;
+    }
+    
+    .password-toggle:hover {
+      color: #C19A5B;
+    }
+    
+    .btn-primary {
+      width: 100%;
+      background: #C19A5B;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem;
+      color: #0B0E14;
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background: #D4AF37;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px -8px rgba(193, 154, 91, 0.3);
+    }
+    
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      width: 100%;
+      background: transparent;
+      border: 1px solid #2D333B;
+      border-radius: 12px;
+      padding: 1rem;
+      color: #E2E8F0;
+      font-weight: 500;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.75rem;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .btn-secondary:hover {
+      background: #1C2128;
+      border-color: #C19A5B;
+    }
+    
+    .text-footnote {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.25rem;
+      color: #6E7681;
+      font-size: 0.75rem;
+    }
+    
+    .text-footnote i {
+      color: #8B949E;
+      margin-right: 0.375rem;
+    }
+    
+    .message-panel {
+      margin: 0 2rem 1rem 2rem;
+      padding: 0.875rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #1C2128;
+      border: 1px solid #2D333B;
+    }
+    
+    .message-panel.success {
+      background: #1A2A1F;
+      border-color: #347D39;
+      color: #B5F0B5;
+    }
+    
+    .message-panel.success i {
+      color: #3FB950;
+    }
+    
+    .message-panel.error {
+      background: #2D1F1F;
+      border-color: #A14545;
+      color: #FFB5B5;
+    }
+    
+    .message-panel.error i {
+      color: #F97575;
+    }
+    
+    .message-panel.info {
+      background: #1A2A3F;
+      border-color: #3B7CB8;
+      color: #B5D0FF;
+    }
+    
+    .message-panel.info i {
+      color: #5A9EFF;
+    }
+    
+    .error-card {
+      margin: 0 2rem 1.5rem 2rem;
+      padding: 2rem 1.5rem;
+      background: #1C2128;
+      border: 1px solid #A14545;
+      border-radius: 20px;
+      text-align: center;
+    }
+    
+    .error-icon-large {
+      font-size: 2.5rem;
+      color: #F97575;
+      margin-bottom: 1rem;
+    }
+    
+    .error-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #FFB5B5;
+      margin-bottom: 0.5rem;
+    }
+    
+    .error-message {
+      color: #ADBAC7;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    
+    .error-code {
+      color: #8B949E;
+      font-size: 0.7rem;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+    }
+    
+    .divider {
+      height: 1px;
+      background: #2D333B;
+      margin: 1.5rem 2rem 1rem 2rem;
+    }
+    
+    .footer-stats {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 2rem 2rem 2rem;
+      color: #6E7681;
+      font-size: 0.7rem;
+    }
+    
+    .footer-stats span i {
+      margin-right: 0.375rem;
+      color: #8B949E;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .badge {
+      background: rgba(193, 154, 91, 0.1);
+      border: 1px solid rgba(193, 154, 91, 0.3);
+      border-radius: 100px;
+      padding: 0.2rem 1rem;
+      font-size: 0.65rem;
+      color: #C19A5B;
+      display: inline-block;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    
+    .pricing-badge {
+      background: rgba(193, 154, 91, 0.15);
+      border: 1px solid #C19A5B;
+      border-radius: 20px;
+      padding: 0.25rem 1rem;
+      font-size: 0.75rem;
+      color: #C19A5B;
+      display: inline-block;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(193, 154, 91, 0.3);
+      border-radius: 50%;
+      border-top-color: #C19A5B;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    select.input-icon-field {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238B949E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1rem;
+      padding-right: 2.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="premium-card">
+
+  <!-- brand header -->
+  <div class="brand-section">
+    <div class="brand-title">
+      ZERION<span class="brand-accent">X1</span>
+      <span class="badge">v2.5.0</span>
+    </div>
+    <div class="brand-subtitle">institutional trading platform</div>
+  </div>
+
+  <!-- tabs -->
+  <div class="tab-container">
+    <div id="loginTab" class="tab-item active">LOGIN</div>
+    <div id="signupTab" class="tab-item">CREATE ACCOUNT</div>
+  </div>
+
+  <!-- message area -->
+  <div id="messagePanel" class="message-panel hidden">
+    <i id="messageIcon" class="fa-regular fa-circle-check"></i>
+    <span id="messageText"></span>
+  </div>
+
+  <!-- error card -->
+  <div id="errorCard" class="error-card hidden">
+    <div class="error-icon-large">
+      <i class="fa-regular fa-circle-exclamation"></i>
+    </div>
+    <div class="error-title">System Error</div>
+    <div class="error-message" id="errorMessage">Unable to process request</div>
+    <div class="error-code">ERROR · ZERIONX1-4O2</div>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <form id="loginForm" class="form-container">
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-envelope input-icon"></i>
+      <input type="email" id="loginEmail" class="input-icon-field" placeholder="Email address" required>
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-solid fa-lock input-icon"></i>
+      <input type="password" id="loginPassword" class="input-icon-field" placeholder="Password" required>
+      <i id="toggleLoginPass" class="fa-regular fa-eye password-toggle"></i>
+    </div>
+
+    <button type="submit" id="loginBtn" class="btn-primary">
+      <i class="fa-regular fa-arrow-right-to-bracket" style="margin-right: 0.5rem;"></i>
+      Access Terminal
+    </button>
+
+    <div class="text-footnote">
+      <span><i class="fa-regular fa-shield-check"></i> 2FA protected</span>
+      <span><i class="fa-regular fa-clock"></i> session timeout 15min</span>
+    </div>
+  </form>
+
+  <!-- SIGNUP FORM -->
+  <form id="signupForm" class="form-container hidden">
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-user input-icon"></i>
+      <input type="text" id="name" class="input-icon-field" placeholder="Full name" required>
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-envelope input-icon"></i>
+      <input type="email" id="email" class="input-icon-field" placeholder="Email address" required>
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-phone input-icon"></i>
+      <input type="tel" id="phone" class="input-icon-field" placeholder="Phone number" required>
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-solid fa-lock input-icon"></i>
+      <input type="password" id="password" class="input-icon-field" placeholder="Password" required>
+      <i id="togglePass" class="fa-regular fa-eye password-toggle"></i>
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-flag input-icon"></i>
+      <select id="marketSelect" class="input-icon-field" required>
+        <option value="" disabled selected>Select your trading package</option>
+        <option value="indian_7day">🇮🇳 Indian Market (7 Days Free Trial) - ₹0</option>
+        <option value="indian_3499">🇮🇳 Indian Market Premium - ₹3,499</option>
+        <option value="binary_4999">📊 Binary + Forex + Crypto - ₹4,999</option>
+        <option value="custom">⚡ Custom Enterprise Package (Contact Sales)</option>
+      </select>
+    </div>
+
+    <button type="submit" id="signupBtn" class="btn-primary">
+      <i class="fa-regular fa-user-plus" style="margin-right: 0.5rem;"></i>
+      Create Account & Proceed
+    </button>
+
+    <div class="text-footnote">
+      <span><i class="fa-regular fa-envelope"></i> email verification required</span>
+      <span><i class="fa-regular fa-indian-rupee-sign"></i> secure payment</span>
+    </div>
+  </form>
+
+  <div class="divider"></div>
+
+  <!-- footer stats -->
+  <div class="footer-stats">
+    <span><i class="fa-regular fa-chart-line"></i> All Markets</span>
+    <span><i class="fa-regular fa-microchip"></i> Paper Trading</span>
+    <span><i class="fa-regular fa-gauge-high"></i> 0.1ms latency</span>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ========== SUPABASE INIT ==========
+    const SUPABASE_URL = "https://dpmqjvaylnszykujmufv.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwbXFqdmF5bG5zenlrdWptdWZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk4NzY1NDMsImV4cCI6MjAyNTQ1MjU0M30.your_actual_anon_key";
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: true }
+    });
+
+    // ========== DOM ELEMENTS ==========
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    
+    const messagePanel = document.getElementById('messagePanel');
+    const messageIcon = document.getElementById('messageIcon');
+    const messageText = document.getElementById('messageText');
+    const errorCard = document.getElementById('errorCard');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // login elements
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginBtn = document.getElementById('loginBtn');
+    const toggleLoginPass = document.getElementById('toggleLoginPass');
+
+    // signup elements
+    const nameField = document.getElementById('name');
+    const emailField = document.getElementById('email');
+    const phoneField = document.getElementById('phone');
+    const passwordField = document.getElementById('password');
+    const marketSelect = document.getElementById('marketSelect');
+    const signupBtn = document.getElementById('signupBtn');
+    const togglePass = document.getElementById('togglePass');
+
+    // ========== HELPER FUNCTIONS ==========
+    function showMessage(text, type = 'success') {
+      errorCard.classList.add('hidden');
+      messagePanel.classList.remove('hidden', 'success', 'error', 'info');
+      
+      if (type === 'error') {
+        messagePanel.classList.add('error');
+        messageIcon.className = 'fa-regular fa-circle-exclamation';
+      } else if (type === 'info') {
+        messagePanel.classList.add('info');
+        messageIcon.className = 'fa-regular fa-circle-info';
+      } else {
+        messagePanel.classList.add('success');
+        messageIcon.className = 'fa-regular fa-circle-check';
+      }
+      
+      messageText.textContent = text;
+      
+      // auto hide after 5 seconds for non-error
+      if (type !== 'error') {
+        setTimeout(() => {
+          messagePanel.classList.add('hidden');
+        }, 5000);
+      }
+    }
+
+    function showErrorCard(text) {
+      messagePanel.classList.add('hidden');
+      errorCard.classList.remove('hidden');
+      errorMessage.textContent = text || 'Unable to process request';
+    }
+
+    function hideAllMessages() {
+      messagePanel.classList.add('hidden');
+      errorCard.classList.add('hidden');
+    }
+
+    // ========== CREATE USER COLLECTION TABLE FUNCTION ==========
+    async function createUserCollection(userData) {
+      try {
+        // First check if user already exists
+        const { data: existingUser } = await supabaseClient
+          .from('user_collection')
+          .select('*')
+          .eq('uid', userData.email)
+          .single();
+
+        if (existingUser) {
+          console.log('User already exists in collection');
+          return { success: true, data: existingUser };
+        }
+
+        // Create new user entry
+        const { data, error } = await supabaseClient
+          .from('user_collection')
+          .insert([
+            {
+              uid: userData.email,
+              full_name: userData.name,
+              email: userData.email,
+              phone: userData.phone,
+              market_package: userData.marketPackage,
+              payment_status: userData.marketPackage === 'indian_7day' ? 'approved' : 'pending',
+              payment_amount: userData.amount,
+              payment_date: new Date().toISOString(),
+              approval_status: userData.marketPackage === 'indian_7day' ? 'approved' : 'pending',
+              admin_approved: userData.marketPackage === 'indian_7day' ? true : false,
+              account_created: new Date().toISOString(),
+              subscription_start: userData.marketPackage === 'indian_7day' ? new Date().toISOString() : null,
+              subscription_end: userData.marketPackage === 'indian_7day' ? 
+                new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null,
+              features: userData.features,
+              restrictions: userData.restrictions,
+              metadata: {
+                browser: navigator.userAgent,
+                platform: navigator.platform,
+                signup_date: new Date().toISOString()
+              }
+            }
+          ])
+          .select();
+
+        if (error) {
+          console.error('Error creating user collection:', error);
+          return { success: false, error: error.message };
+        }
+
+        console.log('User collection created:', data);
+        return { success: true, data: data?.[0] };
+      } catch (error) {
+        console.error('Exception in createUserCollection:', error);
+        return { success: false, error: error.message };
+      }
+    }
+
+    // ========== GET PACKAGE DETAILS ==========
+    function getPackageDetails(packageType) {
+      const packages = {
+        indian_7day: {
+          name: 'Indian Market Trial',
+          amount: 0,
+          features: ['Indian Markets Only', 'Basic Indicators', 'Paper Trading', '7 Days Access'],
+          restrictions: ['No Binary Options', 'No Forex', 'No Crypto', 'Limited API Calls']
+        },
+        indian_3499: {
+          name: 'Indian Market Premium',
+          amount: 3499,
+          features: ['All Indian Markets', 'Advanced Indicators', 'Paper Trading', 'Real-time Data', 'API Access'],
+          restrictions: ['No Binary Options', 'No Forex', 'No Crypto']
+        },
+        binary_4999: {
+          name: 'Binary + Forex + Crypto',
+          amount: 4999,
+          features: ['All Indian Markets', 'Binary Options', 'Forex Trading', 'Crypto Trading', 'Advanced Tools', 'API Access'],
+          restrictions: ['Limited API Calls per day']
+        },
+        custom: {
+          name: 'Custom Enterprise',
+          amount: 0,
+          features: ['Custom Features', 'Dedicated Support', 'Custom Integration'],
+          restrictions: ['Contact sales for details']
+        }
+      };
+      return packages[packageType] || packages.indian_7day;
+    }
+
+    // ========== TAB SWITCHING ==========
+    loginTab.addEventListener('click', () => {
+      loginForm.classList.remove('hidden');
+      signupForm.classList.add('hidden');
+      loginTab.classList.add('active');
+      signupTab.classList.remove('active');
+      hideAllMessages();
+    });
+
+    signupTab.addEventListener('click', () => {
+      signupForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      signupTab.classList.add('active');
+      loginTab.classList.remove('active');
+      hideAllMessages();
+    });
+
+    // ========== PASSWORD TOGGLE ==========
+    function setupPasswordToggle(icon, input) {
+      icon.addEventListener('click', (e) => {
+        e.preventDefault();
+        const type = input.type === 'password' ? 'text' : 'password';
+        input.type = type;
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+      });
+    }
+    
+    setupPasswordToggle(togglePass, passwordField);
+    setupPasswordToggle(toggleLoginPass, loginPassword);
+
+    // ========== CHECK SESSION ==========
+    (async () => {
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        
+        if (error) {
+          console.error('Session error:', error);
+          return;
+        }
+        
+        if (session) {
+          // Check if user is approved
+          const { data: userData, error: userError } = await supabaseClient
+            .from('user_collection')
+            .select('*')
+            .eq('uid', session.user.email)
+            .single();
+
+          if (!userError && userData) {
+            if (userData.admin_approved) {
+              window.location.href = 'dashboard.html';
+            } else {
+              window.location.href = 'payment-status.html';
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load session:', err);
+      }
+    })();
+
+    // ========== SIGNUP HANDLER ==========
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // validation
+      if (!nameField.value.trim() || !emailField.value.trim() || !phoneField.value.trim() || !passwordField.value || !marketSelect.value) {
+        showMessage('All fields are required', 'error');
+        return;
+      }
+
+      if (passwordField.value.length < 6) {
+        showMessage('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      const packageDetails = getPackageDetails(marketSelect.value);
+
+      signupBtn.disabled = true;
+      signupBtn.innerHTML = '<i class="fa-regular fa-spinner fa-spin" style="margin-right: 0.5rem;"></i> Creating Account...';
+
+      try {
+        // 1. Create auth user
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+          email: emailField.value.trim(),
+          password: passwordField.value,
+          options: {
+            data: {
+              full_name: nameField.value.trim(),
+              phone: phoneField.value.trim()
+            }
+          }
+        });
+
+        if (authError) {
+          showMessage(authError.message, 'error');
+          signupBtn.disabled = false;
+          signupBtn.innerHTML = '<i class="fa-regular fa-user-plus" style="margin-right: 0.5rem;"></i> Create Account & Proceed';
+          return;
+        }
+
+        // 2. Create user collection entry
+        const userCollectionResult = await createUserCollection({
+          email: emailField.value.trim(),
+          name: nameField.value.trim(),
+          phone: phoneField.value.trim(),
+          marketPackage: marketSelect.value,
+          amount: packageDetails.amount,
+          features: packageDetails.features,
+          restrictions: packageDetails.restrictions
+        });
+
+        if (!userCollectionResult.success) {
+          console.error('Failed to create user collection:', userCollectionResult.error);
+        }
+
+        // 3. Store user data in session storage
+        sessionStorage.setItem('zerionx_user', JSON.stringify({
+          email: emailField.value.trim(),
+          name: nameField.value.trim(),
+          package: marketSelect.value,
+          amount: packageDetails.amount,
+          packageName: packageDetails.name
+        }));
+
+        showMessage('Account created successfully!', 'success');
+        
+        // Redirect based on package
+        setTimeout(() => {
+          if (marketSelect.value === 'indian_7day') {
+            // Free trial - go directly to dashboard
+            window.location.href = 'dashboard.html';
+          } else if (marketSelect.value === 'custom') {
+            // Custom package - show contact sales
+            window.location.href = 'contact-sales.html';
+          } else {
+            // Paid packages - go to payment
+            window.location.href = 'payment.html';
+          }
+        }, 1500);
+
+      } catch (err) {
+        console.error('Signup error:', err);
+        showMessage('Connection error. Please try again.', 'error');
+        signupBtn.disabled = false;
+        signupBtn.innerHTML = '<i class="fa-regular fa-user-plus" style="margin-right: 0.5rem;"></i> Create Account & Proceed';
+      }
+    });
+
+    // ========== LOGIN HANDLER ==========
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value;
+
+      if (!email || !password) {
+        showMessage('Please enter email and password', 'error');
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fa-regular fa-spinner fa-spin" style="margin-right: 0.5rem;"></i> Authenticating...';
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (error) {
+          if (error.message.includes('Email not confirmed')) {
+            showMessage('Please verify your email first', 'error');
+          } else {
+            showMessage(error.message, 'error');
+          }
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<i class="fa-regular fa-arrow-right-to-bracket" style="margin-right: 0.5rem;"></i> Access Terminal';
+          return;
+        }
+
+        // Check user approval status
+        const { data: userData, error: userError } = await supabaseClient
+          .from('user_collection')
+          .select('*')
+          .eq('uid', email)
+          .single();
+
+        if (userError) {
+          console.error('Error fetching user data:', userError);
+          // Create user collection if doesn't exist
+          await createUserCollection({
+            email: email,
+            name: data.user.user_metadata?.full_name || 'User',
+            phone: data.user.user_metadata?.phone || '',
+            marketPackage: 'indian_7day',
+            amount: 0,
+            features: ['Indian Markets Only'],
+            restrictions: ['Trial Version']
+          });
+        }
+
+        // Check if admin approved
+        if (userData && !userData.admin_approved) {
+          showMessage('Account pending approval. Redirecting...', 'info');
+          setTimeout(() => {
+            window.location.href = 'payment-status.html';
+          }, 2000);
+        } else {
+          showMessage('Access granted. Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1500);
+        }
+
+      } catch (err) {
+        console.error('Login error:', err);
+        showMessage('Authentication failed', 'error');
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fa-regular fa-arrow-right-to-bracket" style="margin-right: 0.5rem;"></i> Access Terminal';
+      }
+    });
+
+    // hide messages when typing
+    [loginEmail, loginPassword, nameField, emailField, phoneField, passwordField, marketSelect].forEach(field => {
+      if (field) {
+        field.addEventListener('input', hideAllMessages);
+        field.addEventListener('change', hideAllMessages);
+      }
+    });
+
+    // Add phone number validation
+    phoneField.addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9+]/g, '');
+    });
+
+  })();
+</script>
+
+<!-- SQL to create user_collection table (run this in Supabase SQL editor) -->
+<!--
+-- Create the user_collection table
+CREATE TABLE IF NOT EXISTS user_collection (
+  id BIGSERIAL PRIMARY KEY,
+  uid VARCHAR(255) UNIQUE NOT NULL,
+  full_name VARCHAR(255),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  phone VARCHAR(50),
+  market_package VARCHAR(50),
+  payment_status VARCHAR(50) DEFAULT 'pending',
+  payment_amount DECIMAL(10,2),
+  payment_date TIMESTAMP,
+  approval_status VARCHAR(50) DEFAULT 'pending',
+  admin_approved BOOLEAN DEFAULT false,
+  account_created TIMESTAMP,
+  subscription_start TIMESTAMP,
+  subscription_end TIMESTAMP,
+  features TEXT[],
+  restrictions TEXT[],
+  metadata JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create indexes for faster queries
+CREATE INDEX IF NOT EXISTS idx_user_collection_uid ON user_collection(uid);
+CREATE INDEX IF NOT EXISTS idx_user_collection_email ON user_collection(email);
+CREATE INDEX IF NOT EXISTS idx_user_collection_payment_status ON user_collection(payment_status);
+CREATE INDEX IF NOT EXISTS idx_user_collection_admin_approved ON user_collection(admin_approved);
+
+-- Enable Row Level Security
+ALTER TABLE user_collection ENABLE ROW LEVEL SECURITY;
+
+-- Create policy for users to read their own data
+CREATE POLICY "Users can view own data" ON user_collection
+  FOR SELECT USING (auth.email() = email);
+
+-- Create policy for users to insert their own data
+CREATE POLICY "Users can insert own data" ON user_collection
+  FOR INSERT WITH CHECK (auth.email() = email);
+
+-- Create policy for service role to manage all data
+CREATE POLICY "Service role can manage all" ON user_collection
+  USING (true) WITH CHECK (true);
+-->
+
+<!--
+-- If you get an error about auth.email(), use this simpler policy instead:
+CREATE POLICY "Enable all for authenticated users" ON user_collection
+  USING (auth.role() = 'authenticated') WITH CHECK (auth.role() = 'authenticated');
+-->
+
+</body>
+</html>
