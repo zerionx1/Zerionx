@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZERIONX1 · Institutional Trading Platform</title>
+  
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0B0E14;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #E2E8F0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    
+    .premium-card {
+      background: #161B22;
+      border: 1px solid #2D333B;
+      border-radius: 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 520px;
+      transition: border-color 0.2s ease;
+    }
+    
+    .premium-card:hover {
+      border-color: #3D4450;
+    }
+    
+    .brand-section {
+      text-align: center;
+      padding: 2rem 2rem 1.5rem 2rem;
+      border-bottom: 1px solid #2D333B;
+    }
+    
+    .brand-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #FFFFFF;
+      margin-bottom: 0.25rem;
+    }
+    
+    .brand-accent {
+      color: #C19A5B;
+      font-weight: 700;
+    }
+    
+    .brand-subtitle {
+      color: #8B949E;
+      font-size: 0.875rem;
+      font-weight: 400;
+      letter-spacing: 0.3px;
+    }
+    
+    .tab-container {
+      display: flex;
+      padding: 0 2rem;
+      gap: 2rem;
+      border-bottom: 1px solid #2D333B;
+    }
+    
+    .tab-item {
+      padding: 1rem 0 0.75rem 0;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #8B949E;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    
+    .tab-item.active {
+      color: #C19A5B;
+      border-bottom-color: #C19A5B;
+    }
+    
+    .form-container {
+      padding: 2rem;
+    }
+    
+    .input-icon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      color: #8B949E;
+      font-size: 1rem;
+      z-index: 1;
+    }
+    
+    .input-icon-field {
+      width: 100%;
+      background: #1C2128;
+      border: 1px solid #2D333B;
+      border-radius: 12px;
+      padding: 0.875rem 1rem 0.875rem 2.75rem;
+      color: #E2E8F0;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .input-icon-field:focus {
+      outline: none;
+      border-color: #C19A5B;
+      background: #222832;
+    }
+    
+    .input-icon-field::placeholder {
+      color: #6E7681;
+    }
+    
+    select.input-icon-field {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238B949E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1em;
+      padding-right: 2.5rem;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      color: #8B949E;
+      cursor: pointer;
+      transition: color 0.2s;
+      z-index: 1;
+    }
+    
+    .password-toggle:hover {
+      color: #C19A5B;
+    }
+    
+    .btn-primary {
+      width: 100%;
+      background: #C19A5B;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem;
+      color: #0B0E14;
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background: #D4AF37;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px -8px rgba(193, 154, 91, 0.3);
+    }
+    
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .text-footnote {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.25rem;
+      color: #6E7681;
+      font-size: 0.75rem;
+    }
+    
+    .text-footnote i {
+      color: #8B949E;
+      margin-right: 0.375rem;
+    }
+    
+    .message-panel {
+      margin: 0 2rem 1rem 2rem;
+      padding: 0.875rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #1C2128;
+      border: 1px solid #2D333B;
+    }
+    
+    .message-panel.success {
+      background: #1A2A1F;
+      border-color: #347D39;
+      color: #B5F0B5;
+    }
+    
+    .message-panel.success i {
+      color: #3FB950;
+    }
+    
+    .message-panel.error {
+      background: #2D1F1F;
+      border-color: #A14545;
+      color: #FFB5B5;
+    }
+    
+    .message-panel.error i {
+      color: #F97575;
+    }
+    
+    .message-panel.info {
+      background: #1A2A3F;
+      border-color: #3B7CB8;
+      color: #B5D0FF;
+    }
+    
+    .message-panel.info i {
+      color: #5A9EFF;
+    }
+    
+    .error-card {
+      margin: 0 2rem 1.5rem 2rem;
+      padding: 2rem 1.5rem;
+      background: #1C2128;
+      border: 1px solid #A14545;
+      border-radius: 20px;
+      text-align: center;
+    }
+    
+    .error-icon-large {
+      font-size: 2.5rem;
+      color: #F97575;
+      margin-bottom: 1rem;
+    }
+    
+    .error-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #FFB5B5;
+      margin-bottom: 0.5rem;
+    }
+    
+    .error-message {
+      color: #ADBAC7;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    
+    .error-code {
+      color: #8B949E;
+      font-size: 0.7rem;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+    }
+    
+    .divider {
+      height: 1px;
+      background: #2D333B;
+      margin: 1.5rem 2rem 1rem 2rem;
+    }
+    
+    .footer-stats {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 2rem 2rem 2rem;
+      color: #6E7681;
+      font-size: 0.7rem;
+    }
+    
+    .footer-stats span i {
+      margin-right: 0.375rem;
+      color: #8B949E;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .badge {
+      background: rgba(193, 154, 91, 0.1);
+      border: 1px solid rgba(193, 154, 91, 0.3);
+      border-radius: 100px;
+      padding: 0.2rem 1rem;
+      font-size: 0.65rem;
+      color: #C19A5B;
+      display: inline-block;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    
+    .price-tag {
+      font-size: 0.8rem;
+      color: #C19A5B;
+      margin-left: 0.5rem;
+      font-weight: 600;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .fa-spinner {
+      animation: spin 1s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+<div class="premium-card">
+  <!-- brand header -->
+  <div class="brand-section">
+    <div class="brand-title">
+      ZERION<span class="brand-accent">X1</span>
+      <span class="badge">v2.5.0</span>
+    </div>
+    <div class="brand-subtitle">Multi-Market Algorithmic Trading Platform</div>
+    <div class="flex justify-center gap-2 mt-2">
+      <span class="text-xs bg-gray-800 px-2 py-1 rounded-full">🇮🇳 Indian</span>
+      <span class="text-xs bg-gray-800 px-2 py-1 rounded-full">💱 Forex</span>
+      <span class="text-xs bg-gray-800 px-2 py-1 rounded-full">₿ Crypto</span>
+      <span class="text-xs bg-gray-800 px-2 py-1 rounded-full">📊 Binary</span>
+    </div>
+  </div>
+
+  <!-- tabs -->
+  <div class="tab-container">
+    <div id="loginTab" class="tab-item active">LOGIN</div>
+    <div id="signupTab" class="tab-item">CREATE ACCOUNT</div>
+  </div>
+
+  <!-- message area -->
+  <div id="messagePanel" class="message-panel hidden">
+    <i id="messageIcon" class="fa-regular fa-circle-check"></i>
+    <span id="messageText"></span>
+  </div>
+
+  <!-- error card -->
+  <div id="errorCard" class="error-card hidden">
+    <div class="error-icon-large">
+      <i class="fa-regular fa-circle-exclamation"></i>
+    </div>
+    <div class="error-title">System Error</div>
+    <div class="error-message" id="errorMessage">Unable to process request</div>
+    <div class="error-code">ERROR · ZERIONX1-4O2</div>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <form id="loginForm" class="form-container">
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-envelope input-icon"></i>
+      <input type="email" id="loginEmail" class="input-icon-field" placeholder="Email address" required autocomplete="email">
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-solid fa-lock input-icon"></i>
+      <input type="password" id="loginPassword" class="input-icon-field" placeholder="Password" required autocomplete="current-password">
+      <i id="toggleLoginPass" class="fa-regular fa-eye password-toggle"></i>
+    </div>
+
+    <button type="submit" id="loginBtn" class="btn-primary">
+      <i class="fa-regular fa-arrow-right-to-bracket" style="margin-right: 0.5rem;"></i>
+      Access Terminal
+    </button>
+
+    <div class="text-footnote">
+      <span><i class="fa-regular fa-shield-check"></i> 2FA protected</span>
+      <span><i class="fa-regular fa-clock"></i> session timeout 15min</span>
+    </div>
+  </form>
+
+  <!-- SIGNUP FORM -->
+  <form id="signupForm" class="form-container hidden">
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-user input-icon"></i>
+      <input type="text" id="name" class="input-icon-field" placeholder="Full name" required autocomplete="name">
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-envelope input-icon"></i>
+      <input type="email" id="email" class="input-icon-field" placeholder="Email address" required autocomplete="email">
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-phone input-icon"></i>
+      <input type="tel" id="phone" class="input-icon-field" placeholder="Phone number" required autocomplete="tel">
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-solid fa-lock input-icon"></i>
+      <input type="password" id="password" class="input-icon-field" placeholder="Password" required autocomplete="new-password">
+      <i id="togglePass" class="fa-regular fa-eye password-toggle"></i>
+    </div>
+
+    <div class="input-icon-wrapper">
+      <i class="fa-regular fa-flag input-icon"></i>
+      <select id="marketSelect" class="input-icon-field" required>
+        <option value="" disabled selected>Select your trading package</option>
+        <option value="indian_7day">🇮🇳 Indian Market (7 Days Free Trial)</option>
+        <option value="indian_3499">🇮🇳 Indian Market Premium - ₹3,499/month</option>
+        <option value="binary_4999">🌍 Binary + Forex + Crypto - ₹4,999/month</option>
+        <option value="custom">⚡ Custom Enterprise Package (Contact Sales)</option>
+      </select>
+    </div>
+
+    <div class="flex items-center gap-2 mb-3">
+      <input type="checkbox" id="paperTrading" class="w-4 h-4 accent-[#C19A5B]" checked>
+      <label for="paperTrading" class="text-sm text-gray-400">Enable Paper Trading (Practice Mode)</label>
+    </div>
+
+    <button type="submit" id="signupBtn" class="btn-primary">
+      <i class="fa-regular fa-user-plus" style="margin-right: 0.5rem;"></i>
+      Create Account & Continue
+    </button>
+
+    <div class="text-footnote">
+      <span><i class="fa-regular fa-envelope"></i> email verification required</span>
+      <span><i class="fa-regular fa-indian-rupee-sign"></i> secure payment</span>
+    </div>
+  </form>
+
+  <div class="divider"></div>
+
+  <!-- footer stats -->
+  <div class="footer-stats">
+    <span><i class="fa-regular fa-chart-line"></i> All Markets</span>
+    <span><i class="fa-regular fa-microchip"></i> Paper Trading</span>
+    <span><i class="fa-regular fa-gauge-high"></i> 0.1ms latency</span>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ========== SUPABASE INIT (from your previous code) ==========
+    const SUPABASE_URL = "https://dpmqjvaylnszykujmufv.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_S2HHT0VP1Ru6Dk63ju7V-Q_FnNfX1sd";
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { 
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+
+    // ========== DOM ELEMENTS ==========
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    
+    const messagePanel = document.getElementById('messagePanel');
+    const messageIcon = document.getElementById('messageIcon');
+    const messageText = document.getElementById('messageText');
+    const errorCard = document.getElementById('errorCard');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // login elements
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginBtn = document.getElementById('loginBtn');
+    const toggleLoginPass = document.getElementById('toggleLoginPass');
+
+    // signup elements
+    const nameField = document.getElementById('name');
+    const emailField = document.getElementById('email');
+    const phoneField = document.getElementById('phone');
+    const passwordField = document.getElementById('password');
+    const marketSelect = document.getElementById('marketSelect');
+    const paperTrading = document.getElementById('paperTrading');
+    const signupBtn = document.getElementById('signupBtn');
+    const togglePass = document.getElementById('togglePass');
+
+    // ========== HELPER FUNCTIONS (from your previous code) ==========
+    function showMessage(text, isError = false) {
+      errorCard.classList.add('hidden');
+      messagePanel.classList.remove('hidden', 'success', 'error', 'info');
+      
+      if (isError) {
+        messagePanel.classList.add('error');
+        messageIcon.className = 'fa-regular fa-circle-exclamation';
+      } else {
+        messagePanel.classList.add('success');
+        messageIcon.className = 'fa-regular fa-circle-check';
+      }
+      
+      messageText.textContent = text;
+      
+      // auto hide success messages after 4 seconds
+      if (!isError) {
+        setTimeout(() => {
+          messagePanel.classList.add('hidden');
+        }, 4000);
+      }
+    }
+
+    function showInfoMessage(text) {
+      errorCard.classList.add('hidden');
+      messagePanel.classList.remove('hidden', 'success', 'error', 'info');
+      messagePanel.classList.add('info');
+      messageIcon.className = 'fa-regular fa-circle-info';
+      messageText.textContent = text;
+      
+      setTimeout(() => {
+        messagePanel.classList.add('hidden');
+      }, 5000);
+    }
+
+    function showErrorCard(text) {
+      messagePanel.classList.add('hidden');
+      errorCard.classList.remove('hidden');
+      errorMessage.textContent = text || 'Unable to process request';
+    }
+
+    function hideAllMessages() {
+      messagePanel.classList.add('hidden');
+      errorCard.classList.add('hidden');
+    }
+
+    // ========== CREATE USER COLLECTION FUNCTION ==========
+    async function createUserCollection(userData) {
+      try {
+        // First check if table exists and create if not (you need to run SQL in Supabase)
+        const { data, error } = await supabaseClient
+          .from('user_collection')
+          .insert([
+            {
+              uid: userData.email, // Using email as UID
+              full_name: userData.name,
+              email: userData.email,
+              phone: userData.phone,
+              market_package: userData.marketPackage,
+              payment_status: 'pending',
+              payment_amount: userData.amount,
+              payment_date: new Date().toISOString(),
+              approval_status: 'pending',
+              admin_approved: false,
+              account_created: new Date().toISOString(),
+              paper_trading_enabled: userData.paperTrading || true,
+              subscription_start: userData.marketPackage === 'indian_7day' ? new Date().toISOString() : null,
+              subscription_end: userData.marketPackage === 'indian_7day' ? 
+                new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null,
+              features: userData.features || [],
+              restrictions: userData.restrictions || [],
+              metadata: {
+                browser: navigator.userAgent,
+                platform: navigator.platform,
+                signup_date: new Date().toISOString(),
+                signup_ip: 'collecting...'
+              }
+            }
+          ]);
+
+        if (error) {
+          console.error('Error creating user collection:', error);
+          return { success: false, error: error.message };
+        }
+
+        console.log('User collection created:', data);
+        return { success: true, data };
+      } catch (error) {
+        console.error('Exception in createUserCollection:', error);
+        return { success: false, error: error.message };
+      }
+    }
+
+    // ========== GET PACKAGE DETAILS ==========
+    function getPackageDetails(packageType) {
+      const packages = {
+        indian_7day: {
+          name: 'Indian Market Trial',
+          amount: 0,
+          features: ['Indian Markets Only', 'Basic Indicators', 'Paper Trading', '7 Days Access', 'Limited API Calls'],
+          restrictions: ['No Binary Options', 'No Forex', 'No Crypto', '100 API calls/day', 'Delayed data 15min']
+        },
+        indian_3499: {
+          name: 'Indian Market Premium',
+          amount: 3499,
+          features: ['All Indian Markets', 'Advanced Indicators', 'Paper Trading', 'Real-time Data', 'API Access', 'Strategy Backtesting'],
+          restrictions: ['No Binary Options', 'No Forex', 'No Crypto', '1000 API calls/day']
+        },
+        binary_4999: {
+          name: 'Binary + Forex + Crypto',
+          amount: 4999,
+          features: ['All Indian Markets', 'Binary Options', 'Forex Trading', 'Crypto Trading', 'Advanced Tools', 'API Access', 'Real-time Data All Markets'],
+          restrictions: ['5000 API calls/day', 'Standard support']
+        },
+        custom: {
+          name: 'Custom Enterprise',
+          amount: 0,
+          features: ['Custom Features', 'Dedicated Support', 'Custom Integration', 'Unlimited API', 'Priority Queue'],
+          restrictions: ['Contact sales for details']
+        }
+      };
+      return packages[packageType] || packages.indian_7day;
+    }
+
+    // ========== CHECK IF USER COLLECTION EXISTS ==========
+    async function checkUserCollection(email) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('user_collection')
+          .select('*')
+          .eq('uid', email)
+          .single();
+          
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+          console.error('Error checking user collection:', error);
+        }
+        
+        return { exists: !!data, data };
+      } catch (error) {
+        console.error('Exception checking user collection:', error);
+        return { exists: false, data: null };
+      }
+    }
+
+    // ========== TAB SWITCHING ==========
+    loginTab.addEventListener('click', () => {
+      loginForm.classList.remove('hidden');
+      signupForm.classList.add('hidden');
+      loginTab.classList.add('active');
+      signupTab.classList.remove('active');
+      hideAllMessages();
+    });
+
+    signupTab.addEventListener('click', () => {
+      signupForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      signupTab.classList.add('active');
+      loginTab.classList.remove('active');
+      hideAllMessages();
+    });
+
+    // ========== PASSWORD TOGGLE (from your previous code) ==========
+    function setupPasswordToggle(icon, input) {
+      icon.addEventListener('click', (e) => {
+        e.preventDefault();
+        const type = input.type === 'password' ? 'text' : 'password';
+        input.type = type;
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+      });
+    }
+    
+    setupPasswordToggle(togglePass, passwordField);
+    setupPasswordToggle(toggleLoginPass, loginPassword);
+
+    // ========== CHECK SESSION (from your previous code) ==========
+    (async () => {
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        
+        if (error) {
+          console.error('Session error:', error);
+          showErrorCard('Session error. Please refresh.');
+          return;
+        }
+        
+        if (session) {
+          // Check if user exists in user_collection
+          const { data: userData, error: userError } = await supabaseClient
+            .from('user_collection')
+            .select('*')
+            .eq('uid', session.user.email)
+            .single();
+
+          if (!userError && userData) {
+            if (userData.admin_approved) {
+              window.location.href = 'dashboard.html';
+            } else {
+              window.location.href = 'payment-status.html';
+            }
+          } else {
+            // Create user collection if doesn't exist
+            await createUserCollection({
+              email: session.user.email,
+              name: session.user.user_metadata?.full_name || 'User',
+              phone: session.user.user_metadata?.phone || '',
+              marketPackage: 'indian_7day',
+              amount: 0,
+              paperTrading: true,
+              features: ['Indian Markets Only', 'Paper Trading'],
+              restrictions: ['Trial Version']
+            });
+            window.location.href = 'payment.html';
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load session:', err);
+        // Don't show error on auth page, just continue
+      }
+    })();
+
+    // ========== SIGNUP HANDLER (from your previous code with enhancements) ==========
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // validation
+      if (!nameField.value.trim() || !emailField.value.trim() || !phoneField.value.trim() || !passwordField.value || !marketSelect.value) {
+        showMessage('All fields are required', true);
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailField.value.trim())) {
+        showMessage('Please enter a valid email address', true);
+        return;
+      }
+
+      // Phone validation (basic)
+      if (phoneField.value.trim().length < 10) {
+        showMessage('Please enter a valid phone number', true);
+        return;
+      }
+
+      // Password strength
+      if (passwordField.value.length < 6) {
+        showMessage('Password must be at least 6 characters', true);
+        return;
+      }
+
+      const packageDetails = getPackageDetails(marketSelect.value);
+
+      signupBtn.disabled = true;
+      signupBtn.innerHTML = '<i class="fa-regular fa-spinner fa-spin" style="margin-right: 0.5rem;"></i> Creating Account...';
+
+      try {
+        // Check if user already exists in user_collection
+        const { exists } = await checkUserCollection(emailField.value.trim());
+        
+        if (exists) {
+          showMessage('An account with this email already exists', true);
+          signupBtn.disabled = false;
+          signupBtn.innerHTML = '<i class="fa-regular fa-user-plus" style="margin-right: 0.5rem;"></i> Create Account & Continue';
+          return;
+        }
+
+        // 1. Create auth user (from your previous code)
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+          email: emailField.value.trim(),
+          password: passwordField.value,
+          options: {
+            data: {
+              full_name: nameField.value.trim(),
+              phone: phoneField.value.trim(),
+              market_package: marketSelect.value,
+              paper_trading: paperTrading.checked
+            }
+          }
+        });
+
+        if (authError) {
+          showMessage(authError.message, true);
+          signupBtn.disabled = false;
+          signupBtn.innerHTML = '<i class="fa-regular fa-user-plus" style="margin-right: 0.5rem;"></i> Create Account & Continue';
+          return;
+        }
+
+        // 2. Create user collection entry
+        const userCollectionResult = await createUserCollection({
+          email: emailField.value.trim(),
+          name: nameField.value.trim(),
+          phone: phoneField.value.trim(),
+          marketPackage: marketSelect.value,
+          amount: packageDetails.amount,
+          paperTrading: paperTrading.checked,
+          features: packageDetails.features,
+          restrictions: packageDetails.restrictions
+        });
+
+        if (!userCollectionResult.success) {
+          console.error('Failed to create user collection:', userCollectionResult.error);
+          showInfoMessage('Account created but profile setup incomplete. Please contact support.');
+        }
+
+        showMessage('Account created! Please verify your email.', false);
+        
+        // Store payment info in session storage
+        sessionStorage.setItem('pending_payment', JSON.stringify({
+          email: emailField.value.trim(),
+          package: marketSelect.value,
+          amount: packageDetails.amount,
+          name: packageDetails.name,
+          paperTrading: paperTrading.checked
+        }));
+
+        // switch to login tab after 2 seconds (from your previous code)
+        setTimeout(() => {
+          loginTab.click();
+          loginEmail.value = emailField.value.trim();
+          showInfoMessage('Please verify your email before logging in');
+        }, 2000);
+
+      } catch (err) {
+        console.error('Signup error:', err);
+        showMessage('Connection error. Please try again.', true);
+      } finally {
+        signupBtn.disabled = false;
+        signupBtn.innerHTML = '<i class="fa-regular fa-user-plus" style="margin-right: 0.5rem;"></i> Create Account & Continue';
+      }
+    });
+
+    // ========== LOGIN HANDLER (from your previous code) ==========
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value;
+
+      if (!email || !password) {
+        showMessage('Please enter email and password', true);
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fa-regular fa-spinner fa-spin" style="margin-right: 0.5rem;"></i> Authenticating...';
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (error) {
+          if (error.message.includes('Email not confirmed')) {
+            showMessage('Please verify your email first', true);
+          } else if (error.message.includes('Invalid login credentials')) {
+            showMessage('Invalid email or password', true);
+          } else {
+            showMessage(error.message, true);
+          }
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<i class="fa-regular fa-arrow-right-to-bracket" style="margin-right: 0.5rem;"></i> Access Terminal';
+          return;
+        }
+
+        // Check user in collection
+        const { data: userData, error: userError } = await supabaseClient
+          .from('user_collection')
+          .select('*')
+          .eq('uid', email)
+          .single();
+
+        if (userError && userError.code === 'PGRST116') {
+          // User not in collection, create entry
+          await createUserCollection({
+            email: email,
+            name: data.user.user_metadata?.full_name || 'User',
+            phone: data.user.user_metadata?.phone || '',
+            marketPackage: 'indian_7day',
+            amount: 0,
+            paperTrading: true,
+            features: ['Indian Markets Only', 'Paper Trading'],
+            restrictions: ['Trial Version']
+          });
+          showInfoMessage('Profile created. Please complete payment.');
+          setTimeout(() => {
+            window.location.href = 'payment.html';
+          }, 1500);
+        } else if (userData && !userData.admin_approved) {
+          showInfoMessage('Account pending admin approval. Redirecting...');
+          setTimeout(() => {
+            window.location.href = 'payment-status.html';
+          }, 1500);
+        } else {
+          showMessage('Access granted. Redirecting...', false);
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1200);
+        }
+
+      } catch (err) {
+        console.error('Login error:', err);
+        showMessage('Authentication failed', true);
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fa-regular fa-arrow-right-to-bracket" style="margin-right: 0.5rem;"></i> Access Terminal';
+      }
+    });
+
+    // ========== MARKET SELECT CHANGE HANDLER ==========
+    marketSelect.addEventListener('change', function() {
+      const packageDetails = getPackageDetails(this.value);
+      const detailsDiv = document.getElementById('packageDetails');
+      const selectedPackageName = document.getElementById('selectedPackageName');
+      const selectedMarkets = document.getElementById('selectedMarkets');
+      const selectedAmount = document.getElementById('selectedAmount');
+      
+      if (this.value) {
+        let markets = '';
+        if (this.value.includes('indian')) {
+          markets = 'Indian Markets';
+        } else if (this.value.includes('binary')) {
+          markets = 'Binary, Forex, Crypto';
+        } else {
+          markets = 'Custom Configuration';
+        }
+        
+        selectedPackageName.textContent = packageDetails.name;
+        selectedMarkets.textContent = markets;
+        selectedAmount.textContent = packageDetails.amount > 0 ? `₹${packageDetails.amount}` : 'Free Trial / Custom';
+        
+        // Create details div if it doesn't exist
+        if (!detailsDiv) {
+          const newDetailsDiv = document.createElement('div');
+          newDetailsDiv.id = 'packageDetails';
+          newDetailsDiv.className = 'bg-gray-800 rounded-lg p-3 mb-3 text-xs';
+          newDetailsDiv.innerHTML = `
+            <div class="flex justify-between mb-1">
+              <span class="text-gray-400">Package:</span>
+              <span id="selectedPackageName" class="text-white font-medium">${packageDetails.name}</span>
+            </div>
+            <div class="flex justify-between mb-1">
+              <span class="text-gray-400">Markets:</span>
+              <span id="selectedMarkets" class="text-white">${markets}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-400">Amount:</span>
+              <span id="selectedAmount" class="text-[#C19A5B] font-bold">${packageDetails.amount > 0 ? `₹${packageDetails.amount}` : 'Free Trial / Custom'}</span>
+            </div>
+          `;
+          marketSelect.parentNode.insertAdjacentElement('afterend', newDetailsDiv);
+        } else {
+          detailsDiv.classList.remove('hidden');
+          selectedPackageName.textContent = packageDetails.name;
+          selectedMarkets.textContent = markets;
+          selectedAmount.textContent = packageDetails.amount > 0 ? `₹${packageDetails.amount}` : 'Free Trial / Custom';
+        }
+      } else if (detailsDiv) {
+        detailsDiv.classList.add('hidden');
+      }
+    });
+
+    // hide messages when typing (from your previous code)
+    [loginEmail, loginPassword, nameField, emailField, phoneField, passwordField, marketSelect].forEach(field => {
+      if (field) {
+        field.addEventListener('input', hideAllMessages);
+        field.addEventListener('change', hideAllMessages);
+      }
+    });
+
+  })();
+</script>
+
+<!-- SQL to create user_collection table (run in Supabase SQL editor) -->
+<!--
+CREATE TABLE IF NOT EXISTS user_collection (
+  id BIGSERIAL PRIMARY KEY,
+  uid VARCHAR(255) UNIQUE NOT NULL,
+  full_name VARCHAR(255),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  phone VARCHAR(50),
+  market_package VARCHAR(50),
+  payment_status VARCHAR(50) DEFAULT 'pending',
+  payment_amount DECIMAL(10,2),
+  payment_date TIMESTAMP,
+  approval_status VARCHAR(50) DEFAULT 'pending',
+  admin_approved BOOLEAN DEFAULT false,
+  account_created TIMESTAMP,
+  paper_trading_enabled BOOLEAN DEFAULT true,
+  subscription_start TIMESTAMP,
+  subscription_end TIMESTAMP,
+  features TEXT[],
+  restrictions TEXT[],
+  metadata JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create indexes for faster queries
+CREATE INDEX IF NOT EXISTS idx_user_collection_uid ON user_collection(uid);
+CREATE INDEX IF NOT EXISTS idx_user_collection_email ON user_collection(email);
+CREATE INDEX IF NOT EXISTS idx_user_collection_payment_status ON user_collection(payment_status);
+CREATE INDEX IF NOT EXISTS idx_user_collection_admin_approved ON user_collection(admin_approved);
+-->
+</body>
+</html>
